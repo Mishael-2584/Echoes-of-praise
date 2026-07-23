@@ -1,0 +1,39 @@
+[
+  {
+    "id": "hes-risen-2026",
+    "title": "He's Risen Concert",
+    "tagline": "An Easter celebration of hope in song",
+    "date": "2026-04-05",
+    "time": "4:00 PM",
+    "venue": "Nakuru Players Theatre",
+    "city": "Nakuru, Kenya",
+    "status": "upcoming",
+    "image": "/images/concert-hero.jpg",
+    "description": "Join Echoes of Praise for an evening of gospel excellence—choral classics, contemporary worship, and the joy of the risen Christ.",
+    "ticketTiers": [
+      { "id": "regular", "name": "Regular", "priceKes": 500, "perks": ["General seating", "Digital ticket"] },
+      { "id": "vip", "name": "VIP", "priceKes": 1500, "perks": ["Reserved seating", "Meet & greet", "Program booklet"] },
+      { "id": "family", "name": "Family (4)", "priceKes": 1600, "perks": ["Four regular seats", "Shared booking"] }
+    ],
+    "externalTicketUrl": "",
+    "featured": true
+  },
+  {
+    "id": "night-of-praise-2026",
+    "title": "Night of Praise",
+    "tagline": "Worship under Nakuru skies",
+    "date": "2026-08-15",
+    "time": "6:30 PM",
+    "venue": "Christ the King Cathedral Grounds",
+    "city": "Nakuru, Kenya",
+    "status": "upcoming",
+    "image": "/images/night-of-praise.jpg",
+    "description": "An open-air night of praise featuring Echoes of Praise and guest worship leaders from across the Rift Valley.",
+    "ticketTiers": [
+      { "id": "gate", "name": "Gate", "priceKes": 300, "perks": ["Standing / lawn"] },
+      { "id": "reserved", "name": "Reserved", "priceKes": 800, "perks": ["Chair seating", "Priority entry"] }
+    ],
+    "externalTicketUrl": "",
+    "featured": false
+  }
+]

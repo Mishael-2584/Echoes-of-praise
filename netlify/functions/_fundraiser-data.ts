@@ -1,0 +1,17 @@
+export const fundraiserBaseline = {
+  id: "sound-system-2026",
+  title: "Lift the Sound",
+  subtitle: "A project fundraiser for a professional sound system",
+  goalKes: 850000,
+  raisedKes: 312500,
+  currency: "KES",
+  updatedAt: "2026-07-23T12:00:00+03:00",
+  story:
+    "Echoes of Praise is raising funds for a full professional sound system so our worship can fill every hall in Nakuru and beyond—clear vocals, warm blend, and faithful ministry wherever we are invited.",
+  milestones: [
+    { label: "Mixer & mics", amountKes: 220000 },
+    { label: "Main speakers", amountKes: 450000 },
+    { label: "Monitors & stands", amountKes: 650000 },
+    { label: "Full system ready", amountKes: 850000 },
+  ],
+};
