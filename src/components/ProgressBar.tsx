@@ -8,23 +8,35 @@ type Props = {
 };
 
 export function ProgressBar({ fundraiser, compact = false }: Props) {
-  const target = progressPercent(fundraiser.raisedKes, fundraiser.goalKes);
+  if (!fundraiser.show_progress || !fundraiser.goal_kes) {
+    return (
+      <div className="progress-wrap">
+        <p style={{ color: "var(--mist-muted)", fontWeight: 300 }}>
+          Open giving — every gift strengthens the ministry.
+        </p>
+      </div>
+    );
+  }
+
+  const raised = fundraiser.raised_kes;
+  const goal = fundraiser.goal_kes;
+  const pct = progressPercent(raised, goal);
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
-    const id = requestAnimationFrame(() => setWidth(target));
+    const id = requestAnimationFrame(() => setWidth(pct));
     return () => cancelAnimationFrame(id);
-  }, [target]);
+  }, [pct]);
 
   return (
     <div className="progress-wrap">
       <div className="progress-stats">
         <div>
-          <strong>{formatKes(fundraiser.raisedKes)}</strong>
-          <div>raised of {formatKes(fundraiser.goalKes)}</div>
+          <strong>{formatKes(raised)}</strong>
+          <div>raised of {formatKes(goal)}</div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <strong>{target}%</strong>
+          <strong>{pct}%</strong>
           <div>of goal</div>
         </div>
       </div>
@@ -33,27 +45,23 @@ export function ProgressBar({ fundraiser, compact = false }: Props) {
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={target}
+        aria-valuenow={pct}
         aria-label="Fundraiser progress"
       >
         <div className="progress-fill" style={{ width: `${width}%` }} />
       </div>
       {!compact && (
-        <div className="milestones">
-          {fundraiser.milestones.map((m) => {
-            const done = fundraiser.raisedKes >= m.amountKes;
-            return (
-              <div key={m.label} className={`milestone ${done ? "done" : ""}`}>
-                <span>{done ? "✓ " : ""}{m.label}</span>
-                <span>{formatKes(m.amountKes)}</span>
-              </div>
-            );
-          })}
-        </div>
+        <p
+          style={{
+            marginTop: "0.85rem",
+            fontSize: "0.78rem",
+            color: "var(--mist-muted)",
+            letterSpacing: "0.04em",
+          }}
+        >
+          Campaign progress updates as gifts are confirmed
+        </p>
       )}
-      <p style={{ marginTop: "0.85rem", fontSize: "0.82rem", color: "var(--mist-muted)" }}>
-        Updated {new Date(fundraiser.updatedAt).toLocaleString("en-KE")} · live from secure API
-      </p>
     </div>
   );
 }

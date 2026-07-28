@@ -16,6 +16,7 @@ dist-ssr
 !.env.example
 .netlify
 eop-logo-preview.png
+public/images/gallery/_raw/
 
 # Editor directories and files
 .vscode/*

@@ -1,63 +1,63 @@
 # Echoes of Praise
 
-Official choir website for **Echoes of Praise** — a gospel choir based in Nakuru, Kenya.
+Official choir website for **Echoes of Praise** — Nakuru, Kenya.
+
+**Live:** https://thriving-klepon-4f8cc0.netlify.app/
 
 ## Features
 
-- **Home & About** — brand-led storytelling inspired by world-class gospel ministry sites
-- **Events** — concert listings, tiered tickets, and direct purchase via M-Pesa STK Push (or partner ticket links such as Zenlipa / Mookh)
-- **Give / Lift the Sound** — project fundraiser for a professional sound system with a live progress bar
-- **Secure payments** — HTTPS everywhere (Netlify TLS), Safaricom Daraja STK Push via Netlify Functions, HSTS + security headers
-
-## Brand
-
-Colours from the official EoP logo:
-
-| Token | Hex |
-|-------|-----|
-| Forest green | `#1E5E4A` |
-| Muted gold | `#CDB167` |
-| Ink | `#0A1210` |
-
-Logo assets live in `/public`.
-
-## Stack
-
-- Vite + React + TypeScript
-- React Router
-- Netlify (static hosting + serverless functions)
+- Cinematic public site (brand green `#1E5E4A` + gold `#CDB167`) with choir photography
+- **Events** — upcoming / past, free or paid tickets
+- **Ticketing** — M-Pesa for paid events + attendee analytics (city, county, age, attribution)
+- **Gallery** — photos from admin / seeded Drive set
+- **Give** — ongoing support + campaign fundraisers (optional progress)
+- **Admin** — `/admin` for events, gallery, fundraisers, tickets
+- **Supabase** backend + **Netlify** hosting
 
 ## Local development
 
 ```bash
 npm install
+cp .env.example .env   # then fill Supabase keys
 npm run dev
 ```
 
-Copy `.env.example` to `.env` when you are ready to test live M-Pesa (sandbox credentials from [Safaricom Daraja](https://developer.safaricom.co.ke/)).
+- Site: http://localhost:5173/
+- Admin demo (no Supabase): http://localhost:5173/admin/login — password `echoes-admin`
 
-Without credentials, the payment modal runs in **demo mode** and explains that STK Push is not yet wired.
+## Supabase setup (required for production)
 
-## Netlify deploy
+1. Create a project and run, in order:
+   - `supabase/migrations/001_schema.sql`
+   - `supabase/migrations/002_storage.sql`
+2. Authentication → create an email/password user for admin
+3. Confirm `profiles` has that user with `role = admin` (auto-created by trigger)
+4. Add to **Netlify → Site configuration → Environment variables** (then redeploy):
 
-```bash
-npm run build
-npx netlify deploy --prod
-```
+| Variable | Value |
+|----------|--------|
+| `VITE_SUPABASE_URL` | `https://YOUR_PROJECT.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Project anon/public key |
+| `VITE_ADMIN_DEMO_PASSWORD` | (optional; only for local demo) |
 
-Set these environment variables in the Netlify UI:
+Optional M-Pesa (Netlify Functions):
 
-- `MPESA_ENV` — `sandbox` or `production`
-- `MPESA_CONSUMER_KEY` / `MPESA_CONSUMER_SECRET`
-- `MPESA_SHORTCODE` / `MPESA_PASSKEY`
-- `MPESA_CALLBACK_URL` — `https://<your-site>/api/mpesa-callback`
-- Optional: `FUNDRAISER_RAISED_KES` to override the live progress total
-- Optional: `VITE_MPESA_PAYBILL` / `VITE_MPESA_TILL` / `VITE_MPESA_ACCOUNT` for manual Lipa na M-Pesa fallback
+| Variable | Notes |
+|----------|--------|
+| `MPESA_ENV` | `sandbox` or `production` |
+| `MPESA_CONSUMER_KEY` / `MPESA_CONSUMER_SECRET` | Daraja |
+| `MPESA_SHORTCODE` / `MPESA_PASSKEY` | Paybill / till |
+| `MPESA_CALLBACK_URL` | `https://YOUR_DOMAIN/api/mpesa-callback` |
 
-## Content updates
+5. Authentication → URL configuration: add your Netlify URL (and custom domain later) under **Site URL** and **Redirect URLs**.
 
-- Concerts: edit `public/data/events.json` (set `externalTicketUrl` for Zenlipa/Mookh links)
-- Fundraiser baseline: edit `public/data/fundraiser.json`
+Without Supabase env vars the site still shows seeded content; admin writes stay local to the browser.
+
+## Content
+
+- Gallery images: `public/images/gallery/eop-01.jpg` … `eop-16.jpg`
+- Hero: `public/images/choir-main.jpg`
+- Edit concerts / funds / gallery in `/admin` once Supabase is connected
 
 ## Licence
 

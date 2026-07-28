@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { PaymentModal } from "../components/PaymentModal";
+import { InView } from "../components/InView";
+import { TicketCheckout } from "../components/TicketCheckout";
 import {
+  fetchEvents,
   formatEventDate,
+  formatEventTime,
   formatKes,
-  loadEvents,
+  isUpcoming,
 } from "../lib/api";
 import type { ChoirEvent, TicketTier } from "../types";
 
@@ -12,23 +15,24 @@ export function EventsPage() {
   const { eventId } = useParams();
   const [events, setEvents] = useState<ChoirEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTier, setSelectedTier] = useState<Record<string, string>>({});
+  const [selectedTiers, setSelectedTiers] = useState<Record<string, string>>({});
   const [checkout, setCheckout] = useState<{
     event: ChoirEvent;
     tier: TicketTier;
   } | null>(null);
+  const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
 
   useEffect(() => {
     let alive = true;
-    loadEvents()
+    fetchEvents()
       .then((data) => {
         if (!alive) return;
         setEvents(data);
         const defaults: Record<string, string> = {};
         data.forEach((e) => {
-          if (e.ticketTiers[0]) defaults[e.id] = e.ticketTiers[0].id;
+          if (e.ticket_tiers?.[0]) defaults[e.id] = e.ticket_tiers[0].id;
         });
-        setSelectedTier(defaults);
+        setSelectedTiers(defaults);
       })
       .catch(() => {
         if (alive) setError("Unable to load concert listings.");
@@ -39,17 +43,22 @@ export function EventsPage() {
   }, []);
 
   const focused = useMemo(
-    () => events.find((e) => e.id === eventId) ?? null,
+    () => events.find((e) => e.slug === eventId || e.id === eventId) ?? null,
     [events, eventId],
   );
 
+  const upcoming = events.filter(isUpcoming);
+  const past = events.filter((e) => !isUpcoming(e)).reverse();
+  const list = tab === "upcoming" ? upcoming : past;
+
   function openCheckout(event: ChoirEvent) {
-    if (event.externalTicketUrl) {
-      window.open(event.externalTicketUrl, "_blank", "noopener,noreferrer");
+    if (event.external_ticket_url) {
+      window.open(event.external_ticket_url, "_blank", "noopener,noreferrer");
       return;
     }
-    const tierId = selectedTier[event.id] ?? event.ticketTiers[0]?.id;
-    const tier = event.ticketTiers.find((t) => t.id === tierId);
+    const tiers = event.ticket_tiers ?? [];
+    const tierId = selectedTiers[event.id] ?? tiers[0]?.id;
+    const tier = tiers.find((t) => t.id === tierId);
     if (!tier) return;
     setCheckout({ event, tier });
   }
@@ -58,60 +67,68 @@ export function EventsPage() {
     <>
       <section className="page-hero">
         <div className="container">
-          <span className="section-label">Events</span>
-          <h1 className="section-title">Concerts & tickets</h1>
-          <p className="section-lead">
-            Browse upcoming Echoes of Praise concerts, choose your seat tier, and
-            pay securely with M-Pesa—or follow a direct ticket link when we
-            partner with platforms like Zenlipa or Mookh.
-          </p>
+          <InView>
+            <span className="section-label">Events</span>
+            <h1 className="section-title">Concerts & tickets</h1>
+            <p className="section-lead">
+              Free or paid entry, managed here—with secure M-Pesa for paid nights and
+              registration that helps us know who we serve.
+            </p>
+          </InView>
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: "1rem" }}>
+      <section className="section" style={{ paddingTop: "1.5rem" }}>
         <div className="container">
           {error && <p className="status-msg err">{error}</p>}
 
           {focused && (
-            <article className="ticket-panel" style={{ marginBottom: "2.5rem" }}>
+            <InView className="ticket-panel" as="article">
+              <div className="ticket-panel-media">
+                <img
+                  src={focused.cover_image_url || "/images/choir-main.jpg"}
+                  alt=""
+                />
+              </div>
               <span className="event-date-pill">
-                {formatEventDate(focused.date)} · {focused.time}
+                {formatEventDate(focused.starts_at)} · {formatEventTime(focused.starts_at)}
               </span>
-              <h2 className="section-title" style={{ marginTop: "0.75rem" }}>
+              <h2 className="section-title" style={{ marginTop: "0.9rem" }}>
                 {focused.title}
               </h2>
               <p className="section-lead">{focused.description}</p>
-              <div className="featured-meta">
-                <span>
-                  <strong>Venue</strong> · {focused.venue}, {focused.city}
-                </span>
+              <div className="featured-meta" style={{ marginTop: "1.5rem" }}>
+                <div className="featured-meta-row">
+                  <strong>Venue</strong>
+                  <span>
+                    {focused.venue}, {focused.city}
+                    {focused.county ? ` · ${focused.county}` : ""}
+                  </span>
+                </div>
+                <div className="featured-meta-row">
+                  <strong>Entry</strong>
+                  <span>{focused.is_free ? "Free registration" : "Paid tickets"}</span>
+                </div>
               </div>
 
-              {focused.externalTicketUrl ? (
-                <a
-                  className="btn btn-gold"
-                  href={focused.externalTicketUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Buy tickets on partner site
-                </a>
-              ) : (
+              {(focused.ticket_tiers?.length ?? 0) > 0 ? (
                 <>
                   <div className="ticket-tiers">
-                    {focused.ticketTiers.map((tier) => (
+                    {focused.ticket_tiers!.map((tier) => (
                       <button
                         key={tier.id}
                         type="button"
                         className={`ticket-tier ${
-                          selectedTier[focused.id] === tier.id ? "selected" : ""
+                          selectedTiers[focused.id] === tier.id ? "selected" : ""
                         }`}
                         onClick={() =>
-                          setSelectedTier((s) => ({ ...s, [focused.id]: tier.id }))
+                          setSelectedTiers((s) => ({ ...s, [focused.id]: tier.id }))
                         }
                       >
                         <h4>{tier.name}</h4>
-                        <div className="ticket-price">{formatKes(tier.priceKes)}</div>
+                        <div className="ticket-price">
+                          {tier.price_kes === 0 ? "Free" : formatKes(tier.price_kes)}
+                        </div>
                         <ul>
                           {tier.perks.map((p) => (
                             <li key={p}>{p}</li>
@@ -120,64 +137,108 @@ export function EventsPage() {
                       </button>
                     ))}
                   </div>
-                  <div style={{ marginTop: "1.25rem" }}>
+                  <div style={{ marginTop: "1.4rem" }}>
                     <button
                       type="button"
                       className="btn btn-gold"
                       onClick={() => openCheckout(focused)}
                     >
-                      Purchase with M-Pesa
+                      {focused.is_free ? "Register" : "Get tickets"}
                     </button>
                   </div>
                 </>
+              ) : (
+                <p style={{ color: "var(--mist-muted)" }}>
+                  Tickets for this event are closed or not required.
+                </p>
               )}
-            </article>
+            </InView>
           )}
 
-          <div className="events-grid">
-            {events.map((event) => (
-              <article key={event.id} className="event-card">
-                <div className="event-card-media" />
-                <div className="event-card-body">
-                  <span className="event-date-pill">
-                    {formatEventDate(event.date)}
-                  </span>
-                  <h3>{event.title}</h3>
-                  <p>{event.tagline}</p>
-                  <p style={{ fontSize: "0.9rem" }}>
-                    {event.venue} · from{" "}
-                    {formatKes(
-                      Math.min(...event.ticketTiers.map((t) => t.priceKes)),
-                    )}
-                  </p>
-                  <div style={{ display: "flex", gap: "0.65rem", flexWrap: "wrap" }}>
-                    <Link to={`/events/${event.id}`} className="btn btn-outline">
-                      Concert details
-                    </Link>
-                    <button
-                      type="button"
-                      className="btn btn-gold"
-                      onClick={() => openCheckout(event)}
-                    >
-                      {event.externalTicketUrl ? "Ticket link" : "Buy tickets"}
-                    </button>
-                  </div>
-                </div>
-              </article>
-            ))}
+          <div className="events-tabs">
+            <button
+              type="button"
+              className={tab === "upcoming" ? "active" : undefined}
+              onClick={() => setTab("upcoming")}
+            >
+              Upcoming ({upcoming.length})
+            </button>
+            <button
+              type="button"
+              className={tab === "past" ? "active" : undefined}
+              onClick={() => setTab("past")}
+            >
+              Past ({past.length})
+            </button>
           </div>
+
+          <div className="events-grid">
+            {list.map((event, index) => {
+              const minPrice = Math.min(
+                ...(event.ticket_tiers?.map((t) => t.price_kes) ?? [0]),
+              );
+              return (
+                <InView
+                  key={event.id}
+                  className="event-card"
+                  as="article"
+                  delay={index * 80}
+                >
+                  <div className="event-card-media has-photo">
+                    <img
+                      src={event.cover_image_url || "/images/choir-main.jpg"}
+                      alt=""
+                    />
+                  </div>
+                  <div className="event-card-body">
+                    <span className="event-date-pill">
+                      {formatEventDate(event.starts_at)}
+                    </span>
+                    <h3>{event.title}</h3>
+                    <p>{event.tagline}</p>
+                    <p style={{ fontSize: "0.9rem" }}>
+                      {event.venue}
+                      {tab === "upcoming" &&
+                        ` · ${
+                          event.is_free || minPrice === 0
+                            ? "Free"
+                            : `from ${formatKes(minPrice)}`
+                        }`}
+                    </p>
+                    <div style={{ display: "flex", gap: "0.65rem", flexWrap: "wrap" }}>
+                      <Link to={`/events/${event.slug}`} className="btn btn-outline">
+                        Details
+                      </Link>
+                      {tab === "upcoming" && (event.ticket_tiers?.length ?? 0) > 0 && (
+                        <button
+                          type="button"
+                          className="btn btn-gold"
+                          onClick={() => openCheckout(event)}
+                        >
+                          {event.is_free ? "Register" : "Buy tickets"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </InView>
+              );
+            })}
+          </div>
+
+          {list.length === 0 && (
+            <p style={{ color: "var(--mist-muted)", marginTop: "1rem" }}>
+              No {tab} events yet. Check back soon.
+            </p>
+          )}
         </div>
       </section>
 
       {checkout && (
-        <PaymentModal
+        <TicketCheckout
           open
           onClose={() => setCheckout(null)}
-          kind="ticket"
-          title={`${checkout.event.title} · ${checkout.tier.name}`}
-          amount={checkout.tier.priceKes}
-          reference={`TIX-${checkout.event.id}-${checkout.tier.id}`.toUpperCase()}
-          description={`Ticket: ${checkout.event.title} (${checkout.tier.name})`}
+          event={checkout.event}
+          tier={checkout.tier}
         />
       )}
     </>

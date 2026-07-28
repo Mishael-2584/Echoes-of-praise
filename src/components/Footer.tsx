@@ -15,7 +15,8 @@ export function Footer() {
           <h3>Explore</h3>
           <Link to="/about">About the choir</Link>
           <Link to="/events">Events & tickets</Link>
-          <Link to="/give">Lift the Sound</Link>
+          <Link to="/gallery">Gallery</Link>
+          <Link to="/give">Give & campaigns</Link>
           <Link to="/contact">Contact</Link>
         </div>
         <div className="footer-col">

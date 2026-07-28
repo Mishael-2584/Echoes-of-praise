@@ -1,4 +1,15 @@
-import type { ChoirEvent, Fundraiser } from "../types";
+import type {
+  ChoirEvent,
+  DonationInput,
+  Fundraiser,
+  GalleryItem,
+  TicketOrder,
+  TicketOrderInput,
+  TicketTier,
+} from "../types";
+import { seedEvents, seedFundraisers, seedGallery } from "./seed";
+import { isSupabaseConfigured, supabase } from "./supabase";
+import { initiateMpesaPayment, normalizeKenyaPhone } from "./payments";
 
 export function formatKes(amount: number): string {
   return new Intl.NumberFormat("en-KE", {
@@ -8,72 +19,274 @@ export function formatKes(amount: number): string {
   }).format(amount);
 }
 
-export function formatEventDate(isoDate: string): string {
-  const date = new Date(`${isoDate}T12:00:00`);
+export function formatEventDate(iso: string): string {
   return new Intl.DateTimeFormat("en-KE", {
     weekday: "short",
     day: "numeric",
     month: "long",
     year: "numeric",
-  }).format(date);
+  }).format(new Date(iso));
 }
 
-export function progressPercent(raised: number, goal: number): number {
-  if (goal <= 0) return 0;
+export function formatEventTime(iso: string): string {
+  return new Intl.DateTimeFormat("en-KE", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(iso));
+}
+
+export function progressPercent(raised: number, goal: number | null): number {
+  if (!goal || goal <= 0) return 0;
   return Math.min(100, Math.round((raised / goal) * 1000) / 10);
 }
 
-/** Normalize Kenyan phone to 2547XXXXXXXX for Daraja STK. */
-export function normalizeKenyaPhone(input: string): string | null {
-  const digits = input.replace(/\D/g, "");
-  if (/^2547\d{8}$/.test(digits)) return digits;
-  if (/^07\d{8}$/.test(digits)) return `254${digits.slice(1)}`;
-  if (/^7\d{8}$/.test(digits)) return `254${digits}`;
-  if (/^01\d{8}$/.test(digits)) return `254${digits.slice(1)}`;
-  return null;
+export function isUpcoming(event: ChoirEvent): boolean {
+  return new Date(event.starts_at).getTime() >= Date.now() - 6 * 60 * 60 * 1000;
 }
 
-export async function loadEvents(): Promise<ChoirEvent[]> {
-  const res = await fetch("/data/events.json", { cache: "no-store" });
-  if (!res.ok) throw new Error("Unable to load events");
-  return res.json();
+function withTiers(events: ChoirEvent[], tiers: TicketTier[]): ChoirEvent[] {
+  return events.map((e) => ({
+    ...e,
+    ticket_tiers: tiers
+      .filter((t) => t.event_id === e.id && t.active)
+      .sort((a, b) => a.sort_order - b.sort_order),
+  }));
 }
 
-export async function loadFundraiser(): Promise<Fundraiser> {
-  // Prefer live Netlify function so raised amount can update without redeploying static JSON.
+export async function fetchEvents(): Promise<ChoirEvent[]> {
+  if (!supabase) {
+    try {
+      const demo = localStorage.getItem("eop_demo_events");
+      if (demo) {
+        return JSON.parse(demo) as ChoirEvent[];
+      }
+    } catch {
+      /* fall through */
+    }
+    return seedEvents.map((e) => ({
+      ...e,
+      ticket_tiers: [...(e.ticket_tiers ?? [])],
+    }));
+  }
+
+  const { data: events, error } = await supabase
+    .from("events")
+    .select("*")
+    .eq("status", "published")
+    .order("starts_at", { ascending: true });
+
+  if (error || !events) {
+    console.warn("[events]", error);
+    return seedEvents;
+  }
+
+  if (events.length === 0) {
+    return seedEvents.map((e) => ({
+      ...e,
+      ticket_tiers: [...(e.ticket_tiers ?? [])],
+    }));
+  }
+
+  const ids = events.map((e) => e.id);
+  const { data: tiers } = await supabase
+    .from("ticket_tiers")
+    .select("*")
+    .in("event_id", ids)
+    .eq("active", true)
+    .order("sort_order");
+
+  return withTiers(events as ChoirEvent[], (tiers as TicketTier[]) ?? []);
+}
+
+export async function fetchEventBySlug(slug: string): Promise<ChoirEvent | null> {
+  const events = await fetchEvents();
+  return events.find((e) => e.slug === slug || e.id === slug) ?? null;
+}
+
+export async function fetchFundraisers(): Promise<Fundraiser[]> {
+  if (!supabase) {
+    try {
+      const demo = localStorage.getItem("eop_demo_fundraisers");
+      if (demo) return JSON.parse(demo) as Fundraiser[];
+    } catch {
+      /* fall through */
+    }
+    return seedFundraisers;
+  }
+
+  const { data, error } = await supabase
+    .from("fundraisers")
+    .select("*")
+    .eq("active", true)
+    .order("kind", { ascending: true });
+
+  if (error || !data) {
+    console.warn("[fundraisers]", error);
+    return seedFundraisers;
+  }
+  if (data.length === 0) return seedFundraisers;
+  return data as Fundraiser[];
+}
+
+export async function fetchGallery(): Promise<GalleryItem[]> {
+  if (!supabase) {
+    try {
+      const demo = localStorage.getItem("eop_demo_gallery");
+      if (demo) return JSON.parse(demo) as GalleryItem[];
+    } catch {
+      /* fall through */
+    }
+    return seedGallery;
+  }
+
+  const { data, error } = await supabase
+    .from("gallery_items")
+    .select("*")
+    .eq("published", true)
+    .order("sort_order", { ascending: true });
+
+  if (error || !data) {
+    console.warn("[gallery]", error);
+    return seedGallery;
+  }
+  if (data.length === 0) return seedGallery;
+  return data as GalleryItem[];
+}
+
+const LOCAL_ORDERS_KEY = "eop_ticket_orders";
+
+function readLocalOrders(): TicketOrder[] {
   try {
-    const live = await fetch("/api/fundraiser-status", { cache: "no-store" });
-    if (live.ok) return live.json();
+    return JSON.parse(localStorage.getItem(LOCAL_ORDERS_KEY) || "[]") as TicketOrder[];
   } catch {
-    /* fall through to static file for local/static preview */
+    return [];
   }
-  const res = await fetch("/data/fundraiser.json", { cache: "no-store" });
-  if (!res.ok) throw new Error("Unable to load fundraiser");
-  return res.json();
 }
 
-export async function initiateMpesaPayment(payload: {
-  phone: string;
-  amount: number;
-  kind: "ticket" | "donation";
-  reference: string;
-  description: string;
-}): Promise<{ ok: boolean; message: string; checkoutRequestId?: string }> {
-  const res = await fetch("/api/mpesa-stk", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    return {
-      ok: false,
-      message: data.message || "Payment could not be started. Please try again.",
-    };
-  }
-  return {
-    ok: true,
-    message: data.message || "Check your phone for the M-Pesa prompt.",
-    checkoutRequestId: data.checkoutRequestId,
-  };
+function writeLocalOrders(orders: TicketOrder[]) {
+  localStorage.setItem(LOCAL_ORDERS_KEY, JSON.stringify(orders));
 }
+
+export async function createTicketOrder(
+  input: TicketOrderInput,
+  tier: TicketTier,
+): Promise<{ order: TicketOrder; paymentMessage: string; needsMpesa: boolean }> {
+  const phone = normalizeKenyaPhone(input.buyer_phone);
+  if (!phone) throw new Error("Enter a valid Kenyan phone number (07… / 01…).");
+
+  const amount = tier.price_kes * input.quantity;
+  const needsMpesa = amount > 0;
+
+  const base = {
+    ...input,
+    buyer_phone: phone,
+    amount_kes: amount,
+    status: needsMpesa ? ("pending" as const) : ("confirmed" as const),
+  };
+
+  let order: TicketOrder;
+
+  if (supabase && isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("ticket_orders")
+      .insert({
+        event_id: input.event_id,
+        tier_id: input.tier_id,
+        quantity: input.quantity,
+        amount_kes: amount,
+        buyer_name: input.buyer_name,
+        buyer_email: input.buyer_email,
+        buyer_phone: phone,
+        buyer_city: input.buyer_city || null,
+        buyer_county: input.buyer_county || null,
+        buyer_country: input.buyer_country || "Kenya",
+        age_range: input.age_range || null,
+        heard_about: input.heard_about || null,
+        notes: input.notes || null,
+        status: base.status,
+      })
+      .select("*")
+      .single();
+
+    if (error || !data) throw new Error(error?.message || "Could not create order");
+    order = data as TicketOrder;
+  } else {
+    order = {
+      ...base,
+      id: crypto.randomUUID(),
+      confirmation_code: `EOP${Date.now().toString(36).toUpperCase()}`,
+      created_at: new Date().toISOString(),
+    };
+    writeLocalOrders([order, ...readLocalOrders()]);
+  }
+
+  let paymentMessage = needsMpesa
+    ? "Complete M-Pesa payment on your phone to confirm your ticket."
+    : `Free ticket confirmed. Code: ${order.confirmation_code}`;
+
+  if (needsMpesa) {
+    const pay = await initiateMpesaPayment({
+      phone,
+      amount,
+      kind: "ticket",
+      reference: order.confirmation_code.slice(0, 12),
+      description: `Ticket ${tier.name}`.slice(0, 20),
+    });
+    paymentMessage = pay.message;
+    if (pay.ok && pay.checkoutRequestId && supabase) {
+      await supabase
+        .from("ticket_orders")
+        .update({ mpesa_checkout_id: pay.checkoutRequestId })
+        .eq("id", order.id);
+    }
+  }
+
+  return { order, paymentMessage, needsMpesa };
+}
+
+export async function createDonation(
+  input: DonationInput,
+): Promise<{ message: string }> {
+  const phone = normalizeKenyaPhone(input.donor_phone);
+  if (!phone) throw new Error("Enter a valid Kenyan phone number.");
+
+  if (supabase && isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("donations")
+      .insert({
+        fundraiser_id: input.fundraiser_id,
+        amount_kes: input.amount_kes,
+        donor_name: input.donor_name,
+        donor_email: input.donor_email || null,
+        donor_phone: phone,
+        donor_city: input.donor_city || null,
+        donor_county: input.donor_county || null,
+        message: input.message || null,
+        status: "pending",
+      })
+      .select("id")
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    const pay = await initiateMpesaPayment({
+      phone,
+      amount: input.amount_kes,
+      kind: "donation",
+      reference: `GIVE${String(data?.id || "").slice(0, 8)}`.toUpperCase(),
+      description: "Choir donation",
+    });
+    return { message: pay.message };
+  }
+
+  const pay = await initiateMpesaPayment({
+    phone,
+    amount: input.amount_kes,
+    kind: "donation",
+    reference: "GIVE-LOCAL",
+    description: "Choir donation",
+  });
+  return { message: pay.message };
+}
+
+export { readLocalOrders };
