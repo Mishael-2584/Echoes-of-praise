@@ -86,6 +86,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       });
       if (error) {
         const msg = error.message || "Sign-in failed";
+        if (/invalid path|request url/i.test(msg)) {
+          throw new Error(
+            "Supabase URL looks wrong. In Netlify env, set VITE_SUPABASE_URL to https://YOUR_PROJECT.supabase.co only — do not add /rest/v1/. Then redeploy.",
+          );
+        }
         if (/fetch|network|failed to fetch/i.test(msg)) {
           throw new Error(
             "Could not reach Supabase (network/CSP). Confirm VITE_SUPABASE_URL is set and the site was redeployed after CSP updates.",

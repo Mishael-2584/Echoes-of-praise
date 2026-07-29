@@ -1,6 +1,22 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+/**
+ * Project URL only — never include /rest/v1 or /auth/v1.
+ * Correct:  https://xxxxx.supabase.co
+ * Wrong:    https://xxxxx.supabase.co/rest/v1/
+ */
+function normalizeSupabaseUrl(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  let url = raw.trim().replace(/\/+$/, "");
+  url = url.replace(/\/rest\/v1$/i, "");
+  url = url.replace(/\/auth\/v1$/i, "");
+  url = url.replace(/\/+$/, "");
+  return url || undefined;
+}
+
+const url = normalizeSupabaseUrl(
+  import.meta.env.VITE_SUPABASE_URL as string | undefined,
+);
 
 /**
  * Prefer the new publishable key (`sb_publishable_...`).
@@ -16,3 +32,5 @@ export const isSupabaseConfigured = Boolean(url && publicKey);
 export const supabase: SupabaseClient | null = isSupabaseConfigured
   ? createClient(url!, publicKey!)
   : null;
+
+export const supabaseProjectUrl = url ?? null;

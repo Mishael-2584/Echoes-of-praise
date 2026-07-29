@@ -45,8 +45,10 @@ npm run dev
 
 | Variable | Value |
 |----------|--------|
-| `VITE_SUPABASE_URL` | `https://YOUR_PROJECT.supabase.co` |
+| `VITE_SUPABASE_URL` | `https://YOUR_PROJECT.supabase.co` only — **no** `/rest/v1/` |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Publishable key (`sb_publishable_...`) from **API Keys** |
+
+> If login shows **Invalid path specified in request URL**, your `VITE_SUPABASE_URL` almost certainly includes `/rest/v1/`. Strip that path and redeploy.
 
 > Prefer the new **publishable** key. Legacy `anon` JWT keys still work during the migration window but are [scheduled for deprecation by end of 2026](https://supabase.com/docs/guides/getting-started/api-keys). Optional fallback env: `VITE_SUPABASE_ANON_KEY`.
 
