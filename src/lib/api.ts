@@ -119,6 +119,7 @@ export async function fetchFundraisers(): Promise<Fundraiser[]> {
     .from("fundraisers")
     .select("*")
     .eq("active", true)
+    .is("archived_at", null)
     .order("kind", { ascending: true });
 
   if (error) {
@@ -195,6 +196,8 @@ export async function fetchGalleryAlbums(): Promise<GalleryAlbum[]> {
         description: "",
         event_date: null,
         cover_image_url: items[0]?.image_url ?? null,
+        cover_focus_x: 50,
+        cover_focus_y: 40,
         published: true,
         sort_order: 0,
         items,
@@ -213,6 +216,8 @@ export async function fetchGalleryAlbums(): Promise<GalleryAlbum[]> {
         description: "Moments from Echoes of Praise",
         event_date: null,
         cover_image_url: items[0]?.image_url ?? null,
+        cover_focus_x: 50,
+        cover_focus_y: 40,
         published: true,
         sort_order: 0,
         items,
@@ -229,6 +234,8 @@ export async function fetchGalleryAlbums(): Promise<GalleryAlbum[]> {
   const photos = (items as GalleryItem[]) ?? [];
   return (albums as GalleryAlbum[]).map((album) => ({
     ...album,
+    cover_focus_x: album.cover_focus_x ?? 50,
+    cover_focus_y: album.cover_focus_y ?? 50,
     items: photos.filter((p) => p.album_id === album.id),
     cover_image_url:
       album.cover_image_url ||

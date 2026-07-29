@@ -42,6 +42,10 @@ export type GalleryAlbum = {
   description: string;
   event_date: string | null;
   cover_image_url: string | null;
+  /** 0–100, CSS object-position X */
+  cover_focus_x: number;
+  /** 0–100, CSS object-position Y */
+  cover_focus_y: number;
   published: boolean;
   sort_order: number;
   items?: GalleryItem[];
@@ -71,6 +75,8 @@ export type Fundraiser = {
   show_progress: boolean;
   cover_image_url: string | null;
   active: boolean;
+  /** Soft-delete timestamp — row kept as backup when set */
+  archived_at: string | null;
   event_id: string | null;
   starts_at: string | null;
   ends_at: string | null;

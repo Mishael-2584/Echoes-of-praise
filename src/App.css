@@ -2799,6 +2799,318 @@
   line-height: 1.65;
 }
 
+/* —— Public expandable album cards —— */
+.album-stack {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.album-card {
+  border: 1px solid rgba(205, 177, 103, 0.18);
+  background: rgba(7, 17, 14, 0.55);
+  overflow: hidden;
+}
+
+.album-card-face {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: clamp(220px, 42vw, 340px);
+  text-align: left;
+  color: inherit;
+  padding: 0;
+  border: 0;
+  background: #0a1813;
+  cursor: pointer;
+}
+
+.album-card-cover {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transform: scale(1.02);
+  transition: transform 0.7s var(--ease-out);
+}
+
+.album-card.is-open .album-card-cover,
+.album-card-face:hover .album-card-cover {
+  transform: scale(1.06);
+}
+
+.album-card-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    rgba(4, 10, 8, 0.88) 0%,
+    rgba(4, 10, 8, 0.45) 48%,
+    rgba(4, 10, 8, 0.25) 100%
+  );
+}
+
+.album-card-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 36rem;
+  padding: clamp(1.35rem, 4vw, 2.25rem);
+  display: grid;
+  gap: 0.45rem;
+  align-content: end;
+  min-height: inherit;
+}
+
+.album-card-date {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.album-card-copy h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+  color: var(--white);
+  line-height: 1.15;
+}
+
+.album-card-copy p {
+  margin: 0;
+  color: var(--mist);
+  font-weight: 300;
+  line-height: 1.55;
+  max-width: 34ch;
+}
+
+.album-card-cta {
+  margin-top: 0.75rem;
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgba(205, 177, 103, 0.45);
+  color: var(--gold);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.album-card-panel {
+  padding: 1.25rem 1rem 1.5rem;
+  border-top: 1px solid rgba(205, 177, 103, 0.16);
+  animation: testimonial-pop 0.45s var(--ease-out) both;
+}
+
+.album-empty {
+  color: var(--mist-muted);
+  font-weight: 300;
+  margin: 0;
+}
+
+/* —— Cover focal point picker —— */
+.cover-focus {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1rem 0;
+}
+
+.cover-focus-label {
+  margin: 0;
+  color: var(--mist-muted);
+  font-size: 0.88rem;
+}
+
+.cover-focus-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 800px) {
+  .cover-focus-grid {
+    grid-template-columns: 1.2fr 0.8fr;
+    align-items: start;
+  }
+}
+
+.cover-focus-source {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid rgba(205, 177, 103, 0.28);
+  background: #040a08;
+  cursor: crosshair;
+  overflow: hidden;
+}
+
+.cover-focus-source img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 320px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.cover-focus-pin {
+  position: absolute;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: -0.55rem 0 0 -0.55rem;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(7, 17, 14, 0.8);
+  pointer-events: none;
+}
+
+.cover-focus-preview span {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.cover-focus-frame {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid rgba(205, 177, 103, 0.28);
+  background: #040a08;
+}
+
+.cover-focus-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-focus-sliders {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.cover-focus-sliders label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--mist-muted);
+}
+
+.cover-focus-sliders input[type="range"] {
+  width: 100%;
+  accent-color: var(--gold);
+}
+
+/* —— Admin accordion gallery —— */
+.admin-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-tabs button {
+  padding: 0.65rem 1rem;
+  color: var(--mist-muted);
+  border: 1px solid rgba(205, 177, 103, 0.18);
+}
+
+.admin-tabs button.active {
+  color: var(--ink);
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.admin-accordion {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.admin-acc-item {
+  border: 1px solid rgba(205, 177, 103, 0.16);
+  background: rgba(7, 17, 14, 0.45);
+}
+
+.admin-acc-trigger {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.75rem;
+  text-align: left;
+  color: inherit;
+  background: transparent;
+  border: 0;
+}
+
+.admin-acc-thumb {
+  width: 72px;
+  height: 56px;
+  background: #0a1813 center / cover no-repeat;
+  border: 1px solid rgba(205, 177, 103, 0.15);
+}
+
+.admin-acc-meta {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.admin-acc-meta strong {
+  color: var(--white);
+}
+
+.admin-acc-meta span {
+  color: var(--mist-muted);
+  font-size: 0.82rem;
+}
+
+.admin-acc-chevron {
+  color: var(--gold);
+  font-size: 1.35rem;
+  width: 1.5rem;
+  text-align: center;
+}
+
+.admin-acc-body {
+  padding: 0 0.85rem 1.15rem;
+  border-top: 1px solid rgba(205, 177, 103, 0.12);
+}
+
+.admin-acc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  padding: 0.85rem 0;
+}
+
+.admin-acc-toolbar button {
+  color: var(--gold);
+}
+
+.admin-acc-toolbar button.danger {
+  color: var(--danger);
+}
+
+.admin-form-compact {
+  margin: 0 0 1rem;
+  padding: 1rem;
+}
+
+.admin-form-compact h3 {
+  margin: 0 0 0.75rem;
+  color: var(--white);
+  font-size: 1rem;
+}
+
+.admin-muted {
+  color: var(--mist-muted);
+  font-weight: 300;
+}
+
 /* —— Event gallery albums —— */
 .album-picker {
   display: flex;

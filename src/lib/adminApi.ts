@@ -179,6 +179,8 @@ export async function adminSaveGalleryAlbum(
     description: album.description || "",
     event_date: album.event_date || null,
     cover_image_url: album.cover_image_url || null,
+    cover_focus_x: album.cover_focus_x ?? 50,
+    cover_focus_y: album.cover_focus_y ?? 50,
     published: album.published ?? true,
     sort_order: album.sort_order ?? 0,
   };
@@ -346,6 +348,7 @@ export async function adminSaveFundraiser(
       show_progress: fund.show_progress ?? false,
       cover_image_url: fund.cover_image_url || "/images/choir-main.jpg",
       active: fund.active ?? true,
+      archived_at: fund.archived_at ?? null,
       event_id: fund.event_id || null,
       starts_at: fund.starts_at || null,
       ends_at: fund.ends_at || null,
@@ -369,6 +372,7 @@ export async function adminSaveFundraiser(
     show_progress: fund.show_progress ?? false,
     cover_image_url: fund.cover_image_url || null,
     active: fund.active ?? true,
+    archived_at: fund.archived_at ?? null,
     event_id: fund.event_id || null,
     starts_at: fund.starts_at || null,
     ends_at: fund.ends_at || null,
@@ -381,6 +385,43 @@ export async function adminSaveFundraiser(
     const { error } = await supabase.from("fundraisers").insert(payload);
     if (error) throw error;
   }
+  clearDataCache("fundraisers");
+}
+
+/** Soft-delete: hide from public, keep row as backup. */
+export async function adminArchiveFundraiser(id: string) {
+  const now = new Date().toISOString();
+  if (!supabase) {
+    const list = read(DEMO_FUNDS, seedFundraisers).map((f) =>
+      f.id === id ? { ...f, active: false, archived_at: now } : f,
+    );
+    write(DEMO_FUNDS, list);
+    clearDataCache("fundraisers");
+    return;
+  }
+  const { error } = await supabase
+    .from("fundraisers")
+    .update({ active: false, archived_at: now })
+    .eq("id", id);
+  if (error) throw error;
+  clearDataCache("fundraisers");
+}
+
+/** Restore a soft-deleted campaign. */
+export async function adminRestoreFundraiser(id: string) {
+  if (!supabase) {
+    const list = read(DEMO_FUNDS, seedFundraisers).map((f) =>
+      f.id === id ? { ...f, active: true, archived_at: null } : f,
+    );
+    write(DEMO_FUNDS, list);
+    clearDataCache("fundraisers");
+    return;
+  }
+  const { error } = await supabase
+    .from("fundraisers")
+    .update({ active: true, archived_at: null })
+    .eq("id", id);
+  if (error) throw error;
   clearDataCache("fundraisers");
 }
 

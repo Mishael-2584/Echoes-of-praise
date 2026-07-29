@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { InView } from "../components/InView";
 import { Loader } from "../components/Loader";
 import { fetchGalleryAlbums, formatAlbumDate } from "../lib/api";
@@ -11,14 +11,12 @@ export function GalleryPage() {
     fetchGalleryAlbums,
   );
   const albums = data ?? [];
-  const [activeAlbum, setActiveAlbum] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
   const [active, setActive] = useState<GalleryItem | null>(null);
 
-  const selected = useMemo(() => {
-    if (!albums.length) return null;
-    if (activeAlbum) return albums.find((a) => a.id === activeAlbum) ?? albums[0];
-    return albums[0];
-  }, [albums, activeAlbum]);
+  function toggle(id: string) {
+    setOpenId((cur) => (cur === id ? null : id));
+  }
 
   return (
     <>
@@ -28,8 +26,8 @@ export function GalleryPage() {
             <span className="section-label">Gallery</span>
             <h1 className="section-title">Moments by event</h1>
             <p className="section-lead">
-              Browse past ministry nights and concerts—each album holds the
-              photos from that gathering.
+              Open an album to reveal its photos—each gathering kept in its own
+              chapter.
             </p>
           </InView>
         </div>
@@ -55,29 +53,18 @@ export function GalleryPage() {
           )}
 
           {!loading && albums.length > 0 && (
-            <>
-              <div className="album-picker" role="tablist" aria-label="Events">
-                {albums.map((album) => (
-                  <button
-                    key={album.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={selected?.id === album.id}
-                    className={`album-chip ${
-                      selected?.id === album.id ? "active" : ""
-                    }`}
-                    onClick={() => setActiveAlbum(album.id)}
-                  >
-                    <strong>{album.title}</strong>
-                    {album.event_date && (
-                      <span>{formatAlbumDate(album.event_date)}</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {selected && <AlbumView album={selected} onOpen={setActive} />}
-            </>
+            <div className="album-stack">
+              {albums.map((album, i) => (
+                <AlbumCard
+                  key={album.id}
+                  album={album}
+                  open={openId === album.id}
+                  delay={Math.min(i, 6) * 60}
+                  onToggle={() => toggle(album.id)}
+                  onOpenPhoto={setActive}
+                />
+              ))}
+            </div>
           )}
         </div>
       </section>
@@ -114,62 +101,86 @@ export function GalleryPage() {
   );
 }
 
-function AlbumView({
+function AlbumCard({
   album,
-  onOpen,
+  open,
+  delay,
+  onToggle,
+  onOpenPhoto,
 }: {
   album: GalleryAlbum;
-  onOpen: (item: GalleryItem) => void;
+  open: boolean;
+  delay: number;
+  onToggle: () => void;
+  onOpenPhoto: (item: GalleryItem) => void;
 }) {
   const photos = album.items ?? [];
+  const focusX = album.cover_focus_x ?? 50;
+  const focusY = album.cover_focus_y ?? 50;
 
   return (
-    <div className="album-view">
-      <InView className="album-view-head">
-        {album.cover_image_url && (
-          <div className="album-cover">
-            <img src={album.cover_image_url} alt="" />
-          </div>
-        )}
-        <div>
-          <span className="section-label">
+    <InView className={`album-card ${open ? "is-open" : ""}`} delay={delay}>
+      <button
+        type="button"
+        className="album-card-face"
+        onClick={onToggle}
+        aria-expanded={open}
+      >
+        <div
+          className="album-card-cover"
+          style={
+            album.cover_image_url
+              ? {
+                  backgroundImage: `url(${album.cover_image_url})`,
+                  backgroundPosition: `${focusX}% ${focusY}%`,
+                }
+              : undefined
+          }
+        />
+        <div className="album-card-veil" />
+        <div className="album-card-copy">
+          <span className="album-card-date">
             {album.event_date
               ? formatAlbumDate(album.event_date)
               : "Event album"}
           </span>
-          <h2 className="section-title">{album.title}</h2>
-          {album.description && (
-            <p className="section-lead">{album.description}</p>
-          )}
-          <p className="album-count">
-            {photos.length} photo{photos.length === 1 ? "" : "s"}
-          </p>
+          <h2>{album.title}</h2>
+          {album.description && <p>{album.description}</p>}
+          <span className="album-card-cta">
+            {open
+              ? "Close album"
+              : `Open · ${photos.length} photo${photos.length === 1 ? "" : "s"}`}
+          </span>
         </div>
-      </InView>
+      </button>
 
-      <div className="gallery-masonry">
-        {photos.map((item, i) => (
-          <InView key={item.id} delay={Math.min(i, 8) * 40}>
-            <button
-              type="button"
-              className="gallery-item"
-              onClick={() => onOpen(item)}
-            >
-              <img src={item.image_url} alt={item.title || "Gallery photo"} />
-              <span className="gallery-item-meta">
-                <strong>{item.title}</strong>
-                {item.caption && <em>{item.caption}</em>}
-              </span>
-            </button>
-          </InView>
-        ))}
-      </div>
-
-      {photos.length === 0 && (
-        <p style={{ color: "var(--mist-muted)", marginTop: "1rem" }}>
-          Photos for this event will appear once uploaded in admin.
-        </p>
+      {open && (
+        <div className="album-card-panel">
+          {photos.length === 0 ? (
+            <p className="album-empty">Photos coming soon for this event.</p>
+          ) : (
+            <div className="gallery-masonry">
+              {photos.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="gallery-item"
+                  onClick={() => onOpenPhoto(item)}
+                >
+                  <img
+                    src={item.image_url}
+                    alt={item.title || "Gallery photo"}
+                  />
+                  <span className="gallery-item-meta">
+                    <strong>{item.title}</strong>
+                    {item.caption && <em>{item.caption}</em>}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       )}
-    </div>
+    </InView>
   );
 }

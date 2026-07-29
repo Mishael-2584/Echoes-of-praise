@@ -35,6 +35,7 @@ npm run dev
    - `supabase/migrations/004_one_concert.sql` (ONE Concert + fundraiser)
    - `supabase/migrations/005_ensure_admin_profiles.sql` (after creating Auth users)
    - `supabase/migrations/006_gallery_albums.sql` (event-based gallery)
+   - `supabase/migrations/007_soft_delete_and_cover_focus.sql` (campaign archive + album cover crop)
 2. Authentication → create email/password user(s) for admin
 3. Run `005_ensure_admin_profiles.sql` so each Auth user gets `profiles.role = admin`
 4. Authentication → URL configuration: set **Site URL** to `https://echoesofpraize.com` and add Redirect URLs:
