@@ -37,8 +37,11 @@ npm run dev
 | Variable | Value |
 |----------|--------|
 | `VITE_SUPABASE_URL` | `https://YOUR_PROJECT.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | Project anon/public key |
-| `VITE_ADMIN_DEMO_PASSWORD` | (optional; only for local demo) |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Publishable key (`sb_publishable_...`) from **API Keys** |
+
+> Prefer the new **publishable** key. Legacy `anon` JWT keys still work during the migration window but are [scheduled for deprecation by end of 2026](https://supabase.com/docs/guides/getting-started/api-keys). Optional fallback env: `VITE_SUPABASE_ANON_KEY`.
+
+Never put a **secret** key (`sb_secret_...`) or legacy `service_role` in Vite/`VITE_*` — those bypass RLS and must stay server-side only.
 
 Optional M-Pesa (Netlify Functions):
 

@@ -1156,8 +1156,9 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 28%;
-  transform: scale(1.04);
+  /* Keep the full choir centered — not a soloist crop */
+  object-position: center 42%;
+  transform: scale(1.02);
   animation: drift 22s ease-in-out infinite;
   filter: saturate(1.05) contrast(1.05);
 }
