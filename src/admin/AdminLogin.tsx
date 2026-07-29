@@ -40,7 +40,7 @@ export function AdminLogin() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="admin@echoesofpraise.ke"
+            placeholder="admin@echoesofpraize.com"
             required={!demoMode}
           />
         </label>

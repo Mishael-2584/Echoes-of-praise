@@ -20,13 +20,13 @@ export function ContactPage() {
         <div className="container contact-grid">
           <InView>
             <div className="contact-card">
-              <h3>General</h3>
-              <a href="mailto:hello@echoesofpraise.ke">hello@echoesofpraise.ke</a>
+              <h3>Email</h3>
+              <a href="mailto:hello@echoesofpraize.com">hello@echoesofpraize.com</a>
+              <p>General enquiries, bookings, and partnerships</p>
             </div>
             <div className="contact-card">
-              <h3>Bookings</h3>
-              <a href="mailto:bookings@echoesofpraise.ke">bookings@echoesofpraise.ke</a>
-              <p>Concerts, church services, and special events</p>
+              <h3>Website</h3>
+              <a href="https://echoesofpraize.com">echoesofpraize.com</a>
             </div>
             <div className="contact-card">
               <h3>Home base</h3>

@@ -7,13 +7,14 @@ export function Footer() {
         <div className="footer-brand">
           <img src="/logo-full.png" alt="Echoes of Praise" />
           <p>
-            A gospel choir from Nakuru, Kenya—lifting voices in worship, harmony,
-            and praise across the Rift Valley and beyond.
+            An independent Christian choir ministry affiliated with Crater SDA
+            Church, Nakuru—spreading the Gospel through sacred music.
           </p>
         </div>
         <div className="footer-col">
           <h3>Explore</h3>
           <Link to="/about">About the choir</Link>
+          <Link to="/members">Leadership & members</Link>
           <Link to="/events">Events & tickets</Link>
           <Link to="/gallery">Gallery</Link>
           <Link to="/give">Give & campaigns</Link>
@@ -22,7 +23,8 @@ export function Footer() {
         <div className="footer-col">
           <h3>Visit & connect</h3>
           <p>Nakuru, Kenya</p>
-          <a href="mailto:hello@echoesofpraise.ke">hello@echoesofpraise.ke</a>
+          <a href="mailto:hello@echoesofpraize.com">hello@echoesofpraize.com</a>
+          <a href="https://echoesofpraize.com">echoesofpraize.com</a>
           <p>Payments secured over HTTPS via M-Pesa</p>
         </div>
       </div>

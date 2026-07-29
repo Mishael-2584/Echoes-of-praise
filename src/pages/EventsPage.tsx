@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { InView } from "../components/InView";
+import { Loader } from "../components/Loader";
 import { TicketCheckout } from "../components/TicketCheckout";
 import {
   fetchEvents,
@@ -9,12 +10,13 @@ import {
   formatKes,
   isUpcoming,
 } from "../lib/api";
+import { useCachedResource } from "../lib/useCachedResource";
 import type { ChoirEvent, TicketTier } from "../types";
 
 export function EventsPage() {
   const { eventId } = useParams();
-  const [events, setEvents] = useState<ChoirEvent[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error } = useCachedResource("events", fetchEvents);
+  const events = data ?? [];
   const [selectedTiers, setSelectedTiers] = useState<Record<string, string>>({});
   const [checkout, setCheckout] = useState<{
     event: ChoirEvent;
@@ -23,24 +25,19 @@ export function EventsPage() {
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
 
   useEffect(() => {
-    let alive = true;
-    fetchEvents()
-      .then((data) => {
-        if (!alive) return;
-        setEvents(data);
-        const defaults: Record<string, string> = {};
-        data.forEach((e) => {
-          if (e.ticket_tiers?.[0]) defaults[e.id] = e.ticket_tiers[0].id;
-        });
-        setSelectedTiers(defaults);
-      })
-      .catch(() => {
-        if (alive) setError("Unable to load concert listings.");
-      });
-    return () => {
-      alive = false;
-    };
-  }, []);
+    if (!events.length) return;
+    setSelectedTiers((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const e of events) {
+        if (!next[e.id] && e.ticket_tiers?.[0]) {
+          next[e.id] = e.ticket_tiers[0].id;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [events]);
 
   const focused = useMemo(
     () => events.find((e) => e.slug === eventId || e.id === eventId) ?? null,
@@ -51,14 +48,14 @@ export function EventsPage() {
   const past = events.filter((e) => !isUpcoming(e)).reverse();
   const list = tab === "upcoming" ? upcoming : past;
 
-  function openCheckout(event: ChoirEvent) {
+  function openCheckout(event: ChoirEvent, tierId?: string) {
     if (event.external_ticket_url) {
       window.open(event.external_ticket_url, "_blank", "noopener,noreferrer");
       return;
     }
     const tiers = event.ticket_tiers ?? [];
-    const tierId = selectedTiers[event.id] ?? tiers[0]?.id;
-    const tier = tiers.find((t) => t.id === tierId);
+    const id = tierId ?? selectedTiers[event.id] ?? tiers[0]?.id;
+    const tier = tiers.find((t) => t.id === id);
     if (!tier) return;
     setCheckout({ event, tier });
   }
@@ -82,7 +79,15 @@ export function EventsPage() {
         <div className="container">
           {error && <p className="status-msg err">{error}</p>}
 
-          {focused && (
+          {loading && (
+            <Loader
+              label="Loading concerts…"
+              skeletons={3}
+              className="events-loader"
+            />
+          )}
+
+          {!loading && focused && (
             <InView className="ticket-panel" as="article">
               <div className="ticket-panel-media">
                 <img
@@ -91,7 +96,8 @@ export function EventsPage() {
                 />
               </div>
               <span className="event-date-pill">
-                {formatEventDate(focused.starts_at)} · {formatEventTime(focused.starts_at)}
+                {formatEventDate(focused.starts_at)} ·{" "}
+                {formatEventTime(focused.starts_at)}
               </span>
               <h2 className="section-title" style={{ marginTop: "0.9rem" }}>
                 {focused.title}
@@ -107,8 +113,20 @@ export function EventsPage() {
                 </div>
                 <div className="featured-meta-row">
                   <strong>Entry</strong>
-                  <span>{focused.is_free ? "Free registration" : "Paid tickets"}</span>
+                  <span>
+                    {(focused.ticket_tiers?.length ?? 0) === 0
+                      ? "Ticketing coming soon"
+                      : focused.is_free
+                        ? "Free registration"
+                        : "Paid tickets"}
+                  </span>
                 </div>
+                {focused.location_notes && (
+                  <div className="featured-meta-row">
+                    <strong>Notes</strong>
+                    <span>{focused.location_notes}</span>
+                  </div>
+                )}
               </div>
 
               {(focused.ticket_tiers?.length ?? 0) > 0 ? (
@@ -122,12 +140,17 @@ export function EventsPage() {
                           selectedTiers[focused.id] === tier.id ? "selected" : ""
                         }`}
                         onClick={() =>
-                          setSelectedTiers((s) => ({ ...s, [focused.id]: tier.id }))
+                          setSelectedTiers((s) => ({
+                            ...s,
+                            [focused.id]: tier.id,
+                          }))
                         }
                       >
                         <h4>{tier.name}</h4>
                         <div className="ticket-price">
-                          {tier.price_kes === 0 ? "Free" : formatKes(tier.price_kes)}
+                          {tier.price_kes === 0
+                            ? "Free"
+                            : formatKes(tier.price_kes)}
                         </div>
                         <ul>
                           {tier.perks.map((p) => (
@@ -148,87 +171,115 @@ export function EventsPage() {
                   </div>
                 </>
               ) : (
-                <p style={{ color: "var(--mist-muted)" }}>
-                  Tickets for this event are closed or not required.
-                </p>
+                <div className="tickets-soon">
+                  <p>
+                    {isUpcoming(focused)
+                      ? "Ticketing information coming soon."
+                      : "Tickets for this event are closed or were not required."}
+                  </p>
+                  {focused.slug === "one-concert-2026" && (
+                    <Link
+                      to="/give"
+                      className="btn btn-gold"
+                      style={{ marginTop: "1rem" }}
+                    >
+                      Support the anniversary fundraiser
+                    </Link>
+                  )}
+                </div>
               )}
             </InView>
           )}
 
-          <div className="events-tabs">
-            <button
-              type="button"
-              className={tab === "upcoming" ? "active" : undefined}
-              onClick={() => setTab("upcoming")}
-            >
-              Upcoming ({upcoming.length})
-            </button>
-            <button
-              type="button"
-              className={tab === "past" ? "active" : undefined}
-              onClick={() => setTab("past")}
-            >
-              Past ({past.length})
-            </button>
-          </div>
-
-          <div className="events-grid">
-            {list.map((event, index) => {
-              const minPrice = Math.min(
-                ...(event.ticket_tiers?.map((t) => t.price_kes) ?? [0]),
-              );
-              return (
-                <InView
-                  key={event.id}
-                  className="event-card"
-                  as="article"
-                  delay={index * 80}
+          {!loading && (
+            <>
+              <div className="events-tabs">
+                <button
+                  type="button"
+                  className={tab === "upcoming" ? "active" : undefined}
+                  onClick={() => setTab("upcoming")}
                 >
-                  <div className="event-card-media has-photo">
-                    <img
-                      src={event.cover_image_url || "/images/choir-main.jpg"}
-                      alt=""
-                    />
-                  </div>
-                  <div className="event-card-body">
-                    <span className="event-date-pill">
-                      {formatEventDate(event.starts_at)}
-                    </span>
-                    <h3>{event.title}</h3>
-                    <p>{event.tagline}</p>
-                    <p style={{ fontSize: "0.9rem" }}>
-                      {event.venue}
-                      {tab === "upcoming" &&
-                        ` · ${
-                          event.is_free || minPrice === 0
-                            ? "Free"
-                            : `from ${formatKes(minPrice)}`
-                        }`}
-                    </p>
-                    <div style={{ display: "flex", gap: "0.65rem", flexWrap: "wrap" }}>
-                      <Link to={`/events/${event.slug}`} className="btn btn-outline">
-                        Details
-                      </Link>
-                      {tab === "upcoming" && (event.ticket_tiers?.length ?? 0) > 0 && (
-                        <button
-                          type="button"
-                          className="btn btn-gold"
-                          onClick={() => openCheckout(event)}
-                        >
-                          {event.is_free ? "Register" : "Buy tickets"}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </InView>
-              );
-            })}
-          </div>
+                  Upcoming ({upcoming.length})
+                </button>
+                <button
+                  type="button"
+                  className={tab === "past" ? "active" : undefined}
+                  onClick={() => setTab("past")}
+                >
+                  Past ({past.length})
+                </button>
+              </div>
 
-          {list.length === 0 && (
-            <p style={{ color: "var(--mist-muted)", marginTop: "1rem" }}>
-              No {tab} events yet. Check back soon.
-            </p>
+              <div className="events-grid">
+                {list.map((event, index) => {
+                  const tiers = event.ticket_tiers ?? [];
+                  const hasTiers = tiers.length > 0;
+                  const minPrice = hasTiers
+                    ? Math.min(...tiers.map((t) => t.price_kes))
+                    : null;
+                  const priceLabel = !hasTiers
+                    ? "Tickets soon"
+                    : event.is_free || minPrice === 0
+                      ? "Free"
+                      : `from ${formatKes(minPrice!)}`;
+                  return (
+                    <InView
+                      key={event.id}
+                      className="event-card"
+                      as="article"
+                      delay={index * 80}
+                    >
+                      <div className="event-card-media has-photo">
+                        <img
+                          src={event.cover_image_url || "/images/choir-main.jpg"}
+                          alt=""
+                        />
+                      </div>
+                      <div className="event-card-body">
+                        <span className="event-date-pill">
+                          {formatEventDate(event.starts_at)}
+                        </span>
+                        <h3>{event.title}</h3>
+                        <p>{event.tagline}</p>
+                        <p style={{ fontSize: "0.9rem" }}>
+                          {event.venue}
+                          {tab === "upcoming" && ` · ${priceLabel}`}
+                        </p>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "0.65rem",
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          <Link
+                            to={`/events/${event.slug}`}
+                            className="btn btn-outline"
+                          >
+                            Details
+                          </Link>
+                          {tab === "upcoming" && hasTiers && (
+                            <button
+                              type="button"
+                              className="btn btn-gold"
+                              onClick={() => openCheckout(event)}
+                            >
+                              {event.is_free ? "Register" : "Buy tickets"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </InView>
+                  );
+                })}
+              </div>
+
+              {list.length === 0 && (
+                <p style={{ color: "var(--mist-muted)", marginTop: "1rem" }}>
+                  No {tab} events yet. Check back soon.
+                </p>
+              )}
+            </>
           )}
         </div>
       </section>

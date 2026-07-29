@@ -75,16 +75,16 @@ export async function fetchEvents(): Promise<ChoirEvent[]> {
     .eq("status", "published")
     .order("starts_at", { ascending: true });
 
-  if (error || !events) {
+  if (error) {
     console.warn("[events]", error);
-    return seedEvents;
-  }
-
-  if (events.length === 0) {
     return seedEvents.map((e) => ({
       ...e,
       ticket_tiers: [...(e.ticket_tiers ?? [])],
     }));
+  }
+
+  if (!events || events.length === 0) {
+    return [];
   }
 
   const ids = events.map((e) => e.id);
@@ -120,12 +120,11 @@ export async function fetchFundraisers(): Promise<Fundraiser[]> {
     .eq("active", true)
     .order("kind", { ascending: true });
 
-  if (error || !data) {
+  if (error) {
     console.warn("[fundraisers]", error);
     return seedFundraisers;
   }
-  if (data.length === 0) return seedFundraisers;
-  return data as Fundraiser[];
+  return (data as Fundraiser[]) ?? [];
 }
 
 export async function fetchGallery(): Promise<GalleryItem[]> {
@@ -145,12 +144,11 @@ export async function fetchGallery(): Promise<GalleryItem[]> {
     .eq("published", true)
     .order("sort_order", { ascending: true });
 
-  if (error || !data) {
+  if (error) {
     console.warn("[gallery]", error);
     return seedGallery;
   }
-  if (data.length === 0) return seedGallery;
-  return data as GalleryItem[];
+  return (data as GalleryItem[]) ?? [];
 }
 
 const LOCAL_ORDERS_KEY = "eop_ticket_orders";

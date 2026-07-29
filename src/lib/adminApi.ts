@@ -1,4 +1,5 @@
 import type { ChoirEvent, Fundraiser, GalleryItem, TicketOrder, TicketTier } from "../types";
+import { clearDataCache } from "./dataCache";
 import { seedEvents, seedFundraisers, seedGallery } from "./seed";
 import { isSupabaseConfigured, supabase } from "./supabase";
 
@@ -76,6 +77,7 @@ export async function adminSaveEvent(
     if (idx >= 0) list[idx] = next;
     else list.unshift(next);
     write(DEMO_EVENTS, list);
+    clearDataCache("events");
     return;
   }
 
@@ -123,6 +125,7 @@ export async function adminSaveEvent(
     );
     if (error) throw error;
   }
+  clearDataCache("events");
 }
 
 export async function adminDeleteEvent(id: string) {
@@ -131,10 +134,12 @@ export async function adminDeleteEvent(id: string) {
       DEMO_EVENTS,
       read(DEMO_EVENTS, seedEvents).filter((e) => e.id !== id),
     );
+    clearDataCache("events");
     return;
   }
   const { error } = await supabase.from("events").delete().eq("id", id);
   if (error) throw error;
+  clearDataCache("events");
 }
 
 export async function adminListGallery(): Promise<GalleryItem[]> {
@@ -164,6 +169,7 @@ export async function adminSaveGalleryItem(item: Partial<GalleryItem> & { image_
     if (idx >= 0) list[idx] = next;
     else list.unshift(next);
     write(DEMO_GALLERY, list);
+    clearDataCache("gallery");
     return;
   }
 
@@ -182,6 +188,7 @@ export async function adminSaveGalleryItem(item: Partial<GalleryItem> & { image_
     });
     if (error) throw error;
   }
+  clearDataCache("gallery");
 }
 
 export async function adminDeleteGalleryItem(id: string) {
@@ -190,10 +197,12 @@ export async function adminDeleteGalleryItem(id: string) {
       DEMO_GALLERY,
       read(DEMO_GALLERY, seedGallery).filter((g) => g.id !== id),
     );
+    clearDataCache("gallery");
     return;
   }
   const { error } = await supabase.from("gallery_items").delete().eq("id", id);
   if (error) throw error;
+  clearDataCache("gallery");
 }
 
 export async function adminListFundraisers(): Promise<Fundraiser[]> {
@@ -230,6 +239,7 @@ export async function adminSaveFundraiser(
     if (idx >= 0) list[idx] = next;
     else list.unshift(next);
     write(DEMO_FUNDS, list);
+    clearDataCache("fundraisers");
     return;
   }
 
@@ -256,6 +266,7 @@ export async function adminSaveFundraiser(
     const { error } = await supabase.from("fundraisers").insert(payload);
     if (error) throw error;
   }
+  clearDataCache("fundraisers");
 }
 
 export async function adminListOrders(): Promise<TicketOrder[]> {

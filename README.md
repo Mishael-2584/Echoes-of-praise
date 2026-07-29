@@ -2,7 +2,7 @@
 
 Official choir website for **Echoes of Praise** — Nakuru, Kenya.
 
-**Live:** https://thriving-klepon-4f8cc0.netlify.app/
+**Live:** https://thriving-klepon-4f8cc0.netlify.app/ (custom domain: [echoesofpraize.com](https://echoesofpraize.com))
 
 ## Features
 
@@ -11,6 +11,7 @@ Official choir website for **Echoes of Praise** — Nakuru, Kenya.
 - **Ticketing** — M-Pesa for paid events + attendee analytics (city, county, age, attribution)
 - **Gallery** — photos from admin / seeded Drive set
 - **Give** — ongoing support + campaign fundraisers (optional progress)
+- **Members** — leadership, conductors, instrumentalists, A–Z roster
 - **Admin** — `/admin` for events, gallery, fundraisers, tickets
 - **Supabase** backend + **Netlify** hosting
 
@@ -30,8 +31,11 @@ npm run dev
 1. Create a project and run, in order:
    - `supabase/migrations/001_schema.sql`
    - `supabase/migrations/002_storage.sql`
-2. Authentication → create an email/password user for admin
-3. Confirm `profiles` has that user with `role = admin` (auto-created by trigger)
+   - `supabase/migrations/003_gallery_seed.sql` (optional)
+   - `supabase/migrations/004_one_concert.sql` (ONE Concert + fundraiser)
+   - `supabase/migrations/005_ensure_admin_profiles.sql` (after creating Auth users)
+2. Authentication → create email/password user(s) for admin
+3. Run `005_ensure_admin_profiles.sql` so each Auth user gets `profiles.role = admin`
 4. Add to **Netlify → Site configuration → Environment variables** (then redeploy):
 
 | Variable | Value |
@@ -52,7 +56,9 @@ Optional M-Pesa (Netlify Functions):
 | `MPESA_SHORTCODE` / `MPESA_PASSKEY` | Paybill / till |
 | `MPESA_CALLBACK_URL` | `https://YOUR_DOMAIN/api/mpesa-callback` |
 
-5. Authentication → URL configuration: add your Netlify URL (and custom domain later) under **Site URL** and **Redirect URLs**.
+5. Authentication → URL configuration: add your Netlify URL (and `https://echoesofpraize.com`) under **Site URL** and **Redirect URLs**.
+
+Contact: [hello@echoesofpraize.com](mailto:hello@echoesofpraize.com)
 
 Without Supabase env vars the site still shows seeded content; admin writes stay local to the browser.
 

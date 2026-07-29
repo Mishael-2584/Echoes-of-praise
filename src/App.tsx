@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { AdminDashboard } from "./admin/AdminDashboard";
 import { AdminEvents } from "./admin/AdminEvents";
@@ -10,15 +10,46 @@ import { AdminTickets } from "./admin/AdminTickets";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { AdminAuthProvider } from "./lib/adminAuth";
+import { fetchEvents, fetchFundraisers, fetchGallery } from "./lib/api";
+import { getCached, setCached } from "./lib/dataCache";
 import { AboutPage } from "./pages/AboutPage";
 import { ContactPage } from "./pages/ContactPage";
 import { EventsPage } from "./pages/EventsPage";
 import { GalleryPage } from "./pages/GalleryPage";
 import { GivePage } from "./pages/GivePage";
 import { HomePage } from "./pages/HomePage";
+import { MembersPage } from "./pages/MembersPage";
 import "./App.css";
 
 function PublicShell({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    // Warm cache so first paint of Home / Events / Give / Gallery is smoother
+    const warm = async () => {
+      if (!getCached("events")) {
+        try {
+          setCached("events", await fetchEvents());
+        } catch {
+          /* ignore */
+        }
+      }
+      if (!getCached("fundraisers")) {
+        try {
+          setCached("fundraisers", await fetchFundraisers());
+        } catch {
+          /* ignore */
+        }
+      }
+      if (!getCached("gallery")) {
+        try {
+          setCached("gallery", await fetchGallery());
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+    void warm();
+  }, []);
+
   return (
     <div className="site-shell">
       <Header />
@@ -54,6 +85,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/members" element={<MembersPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:eventId" element={<EventsPage />} />
         <Route path="/gallery" element={<GalleryPage />} />

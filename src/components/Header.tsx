@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 const links = [
   { to: "/", label: "Home", end: true },
   { to: "/about", label: "About" },
+  { to: "/members", label: "Members" },
   { to: "/events", label: "Events" },
   { to: "/gallery", label: "Gallery" },
   { to: "/give", label: "Give" },
@@ -52,8 +53,8 @@ export function Header() {
           ))}
         </nav>
 
-        <Link to="/events" className="btn btn-gold nav-cta">
-          Get tickets
+        <Link to="/give" className="btn btn-gold nav-cta">
+          Donate
         </Link>
 
         <button
@@ -83,12 +84,12 @@ export function Header() {
           </NavLink>
         ))}
         <Link
-          to="/events"
+          to="/give"
           className="btn btn-gold"
           style={{ marginTop: "0.75rem" }}
           onClick={() => setOpen(false)}
         >
-          Get tickets
+          Donate
         </Link>
       </nav>
     </header>

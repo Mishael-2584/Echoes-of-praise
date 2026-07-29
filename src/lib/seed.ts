@@ -1,6 +1,7 @@
 import type { ChoirEvent, Fundraiser, GalleryItem, TicketTier } from "../types";
 
 const choirImg = "/images/choir-main.jpg";
+const oneCover = "/images/events/one-concert-cenacle.png";
 
 export const seedTiers: Record<string, TicketTier[]> = {
   "hes-risen-2026": [
@@ -75,9 +76,31 @@ export const seedTiers: Record<string, TicketTier[]> = {
       active: true,
     },
   ],
+  "one-concert-2026": [],
 };
 
 export const seedEvents: ChoirEvent[] = [
+  {
+    id: "one-concert-2026",
+    slug: "one-concert-2026",
+    title: "Echoes of Praise ONE Concert",
+    tagline: "1-year anniversary · Theme: Praise Amplified",
+    description:
+      "Celebrate one year of Echoes of Praise with our anniversary concert—Praise Amplified. Featuring guest choir The Cenacle Ministry (Uganda) and Merge Acapella (Kenya), live at Crater SDA Church, Nakuru. Ticketing information coming soon; you can support the concert through the anniversary fundraiser.",
+    starts_at: "2026-11-29T14:00:00+03:00",
+    ends_at: "2026-11-29T18:00:00+03:00",
+    venue: "Crater SDA Church",
+    city: "Nakuru",
+    county: "Nakuru",
+    location_notes:
+      "Guests: The Cenacle Ministry (Uganda) · Merge Acapella (Kenya)",
+    cover_image_url: oneCover,
+    status: "published",
+    is_free: false,
+    featured: true,
+    external_ticket_url: null,
+    ticket_tiers: seedTiers["one-concert-2026"],
+  },
   {
     id: "hes-risen-2026",
     slug: "hes-risen-2026",
@@ -94,7 +117,7 @@ export const seedEvents: ChoirEvent[] = [
     cover_image_url: choirImg,
     status: "published",
     is_free: false,
-    featured: true,
+    featured: false,
     external_ticket_url: null,
     ticket_tiers: seedTiers["hes-risen-2026"],
   },
@@ -160,6 +183,23 @@ export const seedEvents: ChoirEvent[] = [
 ];
 
 export const seedFundraisers: Fundraiser[] = [
+  {
+    id: "one-concert-2026",
+    slug: "one-concert-2026",
+    title: "ONE Concert Anniversary Fund",
+    subtitle: "Help us host Praise Amplified — 29 November 2026",
+    story:
+      "Support Echoes of Praise as we mark one year of ministry with our ONE Concert at Crater SDA Church, Nakuru. Gifts help cover guest hospitality for The Cenacle Ministry (Uganda) and Merge Acapella (Kenya), staging, sound, and production for Praise Amplified. Tickets are not yet on sale—your giving now builds the night.",
+    kind: "campaign",
+    goal_kes: 500000,
+    raised_kes: 0,
+    show_progress: true,
+    cover_image_url: oneCover,
+    active: true,
+    event_id: "one-concert-2026",
+    starts_at: "2026-07-01T00:00:00+03:00",
+    ends_at: "2026-11-29T23:59:00+03:00",
+  },
   {
     id: "support-the-choir",
     slug: "support-the-choir",

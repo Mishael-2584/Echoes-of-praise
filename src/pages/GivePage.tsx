@@ -1,23 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DonateModal } from "../components/DonateModal";
 import { InView } from "../components/InView";
+import { Loader } from "../components/Loader";
 import { ProgressBar } from "../components/ProgressBar";
 import { fetchFundraisers } from "../lib/api";
+import { useCachedResource } from "../lib/useCachedResource";
 import type { Fundraiser } from "../types";
 
 export function GivePage() {
-  const [fundraisers, setFundraisers] = useState<Fundraiser[]>([]);
+  const { data, loading, error } = useCachedResource(
+    "fundraisers",
+    fetchFundraisers,
+  );
+  const fundraisers = data ?? [];
   const [active, setActive] = useState<Fundraiser | null>(null);
-
-  useEffect(() => {
-    let alive = true;
-    fetchFundraisers().then((data) => {
-      if (alive) setFundraisers(data);
-    });
-    return () => {
-      alive = false;
-    };
-  }, []);
 
   const ongoing = fundraisers.filter((f) => f.kind === "ongoing_support");
   const campaigns = fundraisers.filter((f) => f.kind === "campaign");
@@ -30,8 +26,9 @@ export function GivePage() {
             <span className="section-label">Give</span>
             <h1 className="section-title">Support & campaigns</h1>
             <p className="section-lead">
-              Sustain the choir year-round, or give toward a specific project. Campaign
-              goals and progress bars are optional—set from the admin panel.
+              Sustain the choir year-round, or give toward a specific project.
+              Campaign goals and progress bars are optional—set from the admin
+              panel.
             </p>
           </InView>
         </div>
@@ -39,67 +36,87 @@ export function GivePage() {
 
       <section className="section" style={{ paddingTop: "1.5rem" }}>
         <div className="container">
-          {ongoing.map((fund) => (
-            <InView key={fund.id} className="fund-block">
-              <div className="fund-block-copy">
-                <span className="section-label">Always open</span>
-                <h2 className="section-title">{fund.title}</h2>
-                <p className="section-lead">{fund.subtitle}</p>
-                <p
-                  style={{
-                    color: "var(--mist-muted)",
-                    margin: "1rem 0 1.5rem",
-                    fontWeight: 300,
-                  }}
-                >
-                  {fund.story}
-                </p>
-                <button
-                  type="button"
-                  className="btn btn-gold"
-                  onClick={() => setActive(fund)}
-                >
-                  Give with M-Pesa
-                </button>
-              </div>
-              <div className="fundraiser-panel">
-                <ProgressBar fundraiser={fund} />
-              </div>
-            </InView>
-          ))}
+          {error && <p className="status-msg err">{error}</p>}
 
-          {campaigns.length > 0 && (
-            <div style={{ marginTop: "4rem" }}>
-              <InView>
-                <span className="section-label">Campaigns</span>
-                <h2 className="section-title">Project fundraisers</h2>
-              </InView>
-              <div className="campaign-grid">
-                {campaigns.map((fund, i) => (
-                  <InView key={fund.id} className="campaign-card" delay={i * 80}>
-                    <div className="campaign-card-media">
-                      <img
-                        src={fund.cover_image_url || "/images/choir-main.jpg"}
-                        alt=""
-                      />
-                    </div>
-                    <div className="campaign-card-body">
-                      <h3>{fund.title}</h3>
-                      <p>{fund.subtitle}</p>
-                      <ProgressBar fundraiser={fund} compact />
-                      <button
-                        type="button"
-                        className="btn btn-green"
-                        style={{ marginTop: "1rem" }}
-                        onClick={() => setActive(fund)}
-                      >
-                        Support this campaign
-                      </button>
-                    </div>
+          {loading && (
+            <Loader label="Loading giving options…" skeletons={2} />
+          )}
+
+          {!loading && (
+            <>
+              {ongoing.map((fund) => (
+                <InView key={fund.id} className="fund-block">
+                  <div className="fund-block-copy">
+                    <span className="section-label">Always open</span>
+                    <h2 className="section-title">{fund.title}</h2>
+                    <p className="section-lead">{fund.subtitle}</p>
+                    <p
+                      style={{
+                        color: "var(--mist-muted)",
+                        margin: "1rem 0 1.5rem",
+                        fontWeight: 300,
+                      }}
+                    >
+                      {fund.story}
+                    </p>
+                    <button
+                      type="button"
+                      className="btn btn-gold"
+                      onClick={() => setActive(fund)}
+                    >
+                      Give with M-Pesa
+                    </button>
+                  </div>
+                  <div className="fundraiser-panel">
+                    <ProgressBar fundraiser={fund} />
+                  </div>
+                </InView>
+              ))}
+
+              {campaigns.length > 0 && (
+                <div style={{ marginTop: "4rem" }}>
+                  <InView>
+                    <span className="section-label">Campaigns</span>
+                    <h2 className="section-title">Project fundraisers</h2>
                   </InView>
-                ))}
-              </div>
-            </div>
+                  <div className="campaign-grid">
+                    {campaigns.map((fund, i) => (
+                      <InView
+                        key={fund.id}
+                        className="campaign-card"
+                        delay={i * 80}
+                      >
+                        <div className="campaign-card-media">
+                          <img
+                            src={fund.cover_image_url || "/images/choir-main.jpg"}
+                            alt=""
+                          />
+                        </div>
+                        <div className="campaign-card-body">
+                          <h3>{fund.title}</h3>
+                          <p>{fund.subtitle}</p>
+                          <ProgressBar fundraiser={fund} compact />
+                          <button
+                            type="button"
+                            className="btn btn-green"
+                            style={{ marginTop: "1rem" }}
+                            onClick={() => setActive(fund)}
+                          >
+                            Support this campaign
+                          </button>
+                        </div>
+                      </InView>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {fundraisers.length === 0 && (
+                <p style={{ color: "var(--mist-muted)" }}>
+                  Giving options will appear here once published.
+                </p>
+              )}
+            </>
           )}
         </div>
       </section>

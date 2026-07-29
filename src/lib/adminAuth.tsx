@@ -75,8 +75,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         if (password !== expected) {
           throw new Error("Wrong demo password. Default: echoes-admin");
         }
-        localStorage.setItem(DEMO_KEY, email || "admin@echoesofpraise.ke");
-        setUser({ id: "demo", email: email || "admin@echoesofpraise.ke" });
+        localStorage.setItem(DEMO_KEY, email || "admin@echoesofpraize.com");
+        setUser({ id: "demo", email: email || "admin@echoesofpraize.com" });
         return;
       }
 
