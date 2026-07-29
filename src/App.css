@@ -2906,8 +2906,105 @@
 }
 
 .admin-album-block header button {
-  color: var(--danger);
+  color: var(--gold);
   white-space: nowrap;
+}
+
+.admin-album-block header button.danger {
+  color: var(--danger);
+}
+
+.admin-album-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.admin-album-desc {
+  margin-top: 0.45rem !important;
+  max-width: 40rem;
+  line-height: 1.45;
+}
+
+.admin-section-title {
+  margin: 0 0 0.5rem;
+  color: var(--gold);
+  font-size: 1.25rem;
+}
+
+.admin-edit-panel {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(205, 177, 103, 0.22);
+  background: rgba(7, 17, 14, 0.45);
+}
+
+.admin-edit-panel h3 {
+  margin: 0;
+  color: var(--white);
+}
+
+.admin-edit-panel textarea,
+.admin-photo-edit textarea {
+  width: 100%;
+  min-height: 4rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(205, 177, 103, 0.25);
+  background: rgba(4, 10, 8, 0.7);
+  color: var(--mist);
+  font: inherit;
+  resize: vertical;
+}
+
+.admin-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.admin-photo-card figcaption {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.admin-photo-card figcaption em {
+  display: block;
+  margin-top: 0.2rem;
+  font-style: italic;
+  color: var(--mist-muted);
+  font-weight: 300;
+  font-size: 0.82rem;
+}
+
+.admin-photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-photo-actions button {
+  color: var(--gold);
+  font-size: 0.8rem;
+}
+
+.admin-photo-actions button.danger {
+  color: var(--danger);
+}
+
+.admin-photo-edit {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.75rem;
+}
+
+.admin-photo-edit label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--mist-muted);
 }
 
 /* —— Mobile / small-screen polish —— */

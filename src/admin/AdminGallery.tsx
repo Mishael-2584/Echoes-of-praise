@@ -24,6 +24,17 @@ export function AdminGallery() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [editingAlbumId, setEditingAlbumId] = useState<string | null>(null);
+  const [editAlbumTitle, setEditAlbumTitle] = useState("");
+  const [editAlbumDate, setEditAlbumDate] = useState("");
+  const [editAlbumDescription, setEditAlbumDescription] = useState("");
+  const [editAlbumPublished, setEditAlbumPublished] = useState(true);
+
+  const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
+  const [editPhotoTitle, setEditPhotoTitle] = useState("");
+  const [editPhotoCaption, setEditPhotoCaption] = useState("");
+  const [editPhotoAlbumId, setEditPhotoAlbumId] = useState("");
+
   async function reload() {
     const [a, g] = await Promise.all([
       adminListGalleryAlbums(),
@@ -40,10 +51,15 @@ export function AdminGallery() {
     });
   }, []);
 
+  function clearAlerts() {
+    setMessage(null);
+    setError(null);
+  }
+
   async function onFile(file: File | null) {
     if (!file) return;
     setBusy(true);
-    setError(null);
+    clearAlerts();
     try {
       setImageUrl(await adminUploadImage("gallery", file));
     } catch (err) {
@@ -60,7 +76,7 @@ export function AdminGallery() {
       return;
     }
     setBusy(true);
-    setError(null);
+    clearAlerts();
     try {
       const album = await adminSaveGalleryAlbum({
         title: albumTitle.trim(),
@@ -81,6 +97,85 @@ export function AdminGallery() {
     }
   }
 
+  function startEditAlbum(album: GalleryAlbum) {
+    setEditingAlbumId(album.id);
+    setEditAlbumTitle(album.title);
+    setEditAlbumDate(album.event_date || "");
+    setEditAlbumDescription(album.description || "");
+    setEditAlbumPublished(album.published);
+    clearAlerts();
+  }
+
+  function cancelEditAlbum() {
+    setEditingAlbumId(null);
+  }
+
+  async function saveAlbumEdit(e: FormEvent) {
+    e.preventDefault();
+    if (!editingAlbumId) return;
+    const existing = albums.find((a) => a.id === editingAlbumId);
+    if (!existing) return;
+    if (!editAlbumTitle.trim()) {
+      setError("Album title is required.");
+      return;
+    }
+    setBusy(true);
+    clearAlerts();
+    try {
+      await adminSaveGalleryAlbum({
+        ...existing,
+        title: editAlbumTitle.trim(),
+        description: editAlbumDescription.trim(),
+        event_date: editAlbumDate || null,
+        published: editAlbumPublished,
+      });
+      setEditingAlbumId(null);
+      setMessage("Album updated.");
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update album");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function startEditPhoto(item: GalleryItem) {
+    setEditingPhotoId(item.id);
+    setEditPhotoTitle(item.title || "");
+    setEditPhotoCaption(item.caption || "");
+    setEditPhotoAlbumId(item.album_id || "");
+    clearAlerts();
+  }
+
+  function cancelEditPhoto() {
+    setEditingPhotoId(null);
+  }
+
+  async function savePhotoEdit(e: FormEvent) {
+    e.preventDefault();
+    if (!editingPhotoId) return;
+    const existing = items.find((i) => i.id === editingPhotoId);
+    if (!existing) return;
+    setBusy(true);
+    clearAlerts();
+    try {
+      await adminSaveGalleryItem({
+        ...existing,
+        title: editPhotoTitle.trim(),
+        caption: editPhotoCaption.trim(),
+        album_id: editPhotoAlbumId || null,
+        image_url: existing.image_url,
+      });
+      setEditingPhotoId(null);
+      setMessage("Photo details updated.");
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update photo");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function publishPhoto(e: FormEvent) {
     e.preventDefault();
     if (!selectedAlbumId) {
@@ -92,7 +187,7 @@ export function AdminGallery() {
       return;
     }
     setBusy(true);
-    setError(null);
+    clearAlerts();
     try {
       await adminSaveGalleryItem({
         title: photoTitle,
@@ -122,14 +217,31 @@ export function AdminGallery() {
     }
   }
 
+  async function setAsCover(album: GalleryAlbum, image: string) {
+    setBusy(true);
+    clearAlerts();
+    try {
+      await adminSaveGalleryAlbum({
+        ...album,
+        cover_image_url: image,
+      });
+      setMessage("Album cover updated.");
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not set cover");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="admin-page">
       <header className="admin-page-header">
         <div>
           <h1>Gallery</h1>
           <p>
-            Create an album for each past event, then upload its photos. The
-            public gallery groups pictures by event.
+            Create an album for each past event, upload photos, then edit titles
+            and captions anytime.
           </p>
         </div>
       </header>
@@ -220,58 +332,226 @@ export function AdminGallery() {
       </form>
 
       <div className="admin-album-list">
+        <h2 className="admin-section-title">3. Manage albums &amp; captions</h2>
         {albums.map((album) => {
           const photos = items.filter((i) => i.album_id === album.id);
+          const isEditing = editingAlbumId === album.id;
           return (
             <section key={album.id} className="admin-album-block">
-              <header>
-                <div>
-                  <h3>{album.title}</h3>
-                  <p>
-                    {album.event_date || "No date"} · {photos.length} photo
-                    {photos.length === 1 ? "" : "s"}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    void adminDeleteGalleryAlbum(album.id)
-                      .then(reload)
-                      .catch((err: unknown) =>
-                        setError(
-                          err instanceof Error ? err.message : "Delete failed",
-                        ),
-                      )
-                  }
+              {isEditing ? (
+                <form
+                  className="admin-edit-panel"
+                  onSubmit={(e) => void saveAlbumEdit(e)}
                 >
-                  Delete album
-                </button>
-              </header>
-              <div className="admin-gallery-grid">
-                {photos.map((item) => (
-                  <figure key={item.id}>
-                    <img src={item.image_url} alt={item.title} />
-                    <figcaption>
-                      <strong>{item.title || "Untitled"}</strong>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          void adminDeleteGalleryItem(item.id)
-                            .then(reload)
-                            .catch((err: unknown) =>
-                              setError(
-                                err instanceof Error
-                                  ? err.message
-                                  : "Delete failed",
-                              ),
-                            )
+                  <h3>Edit album</h3>
+                  <div className="admin-form-grid">
+                    <label className="full">
+                      Title
+                      <input
+                        value={editAlbumTitle}
+                        onChange={(e) => setEditAlbumTitle(e.target.value)}
+                        required
+                      />
+                    </label>
+                    <label>
+                      Event date
+                      <input
+                        type="date"
+                        value={editAlbumDate}
+                        onChange={(e) => setEditAlbumDate(e.target.value)}
+                      />
+                    </label>
+                    <label>
+                      Published
+                      <select
+                        value={editAlbumPublished ? "yes" : "no"}
+                        onChange={(e) =>
+                          setEditAlbumPublished(e.target.value === "yes")
                         }
                       >
-                        Delete
-                      </button>
-                    </figcaption>
-                  </figure>
-                ))}
+                        <option value="yes">Yes — visible on site</option>
+                        <option value="no">No — hidden</option>
+                      </select>
+                    </label>
+                    <label className="full">
+                      Description
+                      <textarea
+                        rows={3}
+                        value={editAlbumDescription}
+                        onChange={(e) => setEditAlbumDescription(e.target.value)}
+                      />
+                    </label>
+                  </div>
+                  <div className="admin-edit-actions">
+                    <button type="submit" className="btn btn-gold" disabled={busy}>
+                      Save album
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      onClick={cancelEditAlbum}
+                      disabled={busy}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <header>
+                  <div>
+                    <h3>{album.title}</h3>
+                    <p>
+                      {album.event_date || "No date"} · {photos.length} photo
+                      {photos.length === 1 ? "" : "s"}
+                      {!album.published ? " · Hidden" : ""}
+                    </p>
+                    {album.description && (
+                      <p className="admin-album-desc">{album.description}</p>
+                    )}
+                  </div>
+                  <div className="admin-album-actions">
+                    <button type="button" onClick={() => startEditAlbum(album)}>
+                      Edit album
+                    </button>
+                    <button
+                      type="button"
+                      className="danger"
+                      onClick={() => {
+                        if (
+                          !window.confirm(
+                            `Delete album “${album.title}”? Photos stay in the library but leave this album.`,
+                          )
+                        ) {
+                          return;
+                        }
+                        void adminDeleteGalleryAlbum(album.id)
+                          .then(reload)
+                          .catch((err: unknown) =>
+                            setError(
+                              err instanceof Error
+                                ? err.message
+                                : "Delete failed",
+                            ),
+                          );
+                      }}
+                    >
+                      Delete album
+                    </button>
+                  </div>
+                </header>
+              )}
+
+              <div className="admin-gallery-grid">
+                {photos.map((item) => {
+                  const editing = editingPhotoId === item.id;
+                  return (
+                    <figure key={item.id} className="admin-photo-card">
+                      <img src={item.image_url} alt={item.title} />
+                      {editing ? (
+                        <form
+                          className="admin-photo-edit"
+                          onSubmit={(e) => void savePhotoEdit(e)}
+                        >
+                          <label>
+                            Title
+                            <input
+                              value={editPhotoTitle}
+                              onChange={(e) => setEditPhotoTitle(e.target.value)}
+                            />
+                          </label>
+                          <label>
+                            Caption
+                            <textarea
+                              rows={2}
+                              value={editPhotoCaption}
+                              onChange={(e) =>
+                                setEditPhotoCaption(e.target.value)
+                              }
+                            />
+                          </label>
+                          <label>
+                            Album
+                            <select
+                              value={editPhotoAlbumId}
+                              onChange={(e) =>
+                                setEditPhotoAlbumId(e.target.value)
+                              }
+                            >
+                              <option value="">Unassigned</option>
+                              {albums.map((a) => (
+                                <option key={a.id} value={a.id}>
+                                  {a.title}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <div className="admin-edit-actions">
+                            <button
+                              type="submit"
+                              className="btn btn-gold"
+                              disabled={busy}
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEditPhoto}
+                              disabled={busy}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <figcaption>
+                          <div>
+                            <strong>{item.title || "Untitled"}</strong>
+                            {item.caption && <em>{item.caption}</em>}
+                          </div>
+                          <div className="admin-photo-actions">
+                            <button
+                              type="button"
+                              onClick={() => startEditPhoto(item)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                void setAsCover(album, item.image_url)
+                              }
+                              disabled={busy}
+                            >
+                              Set cover
+                            </button>
+                            <button
+                              type="button"
+                              className="danger"
+                              onClick={() => {
+                                if (
+                                  !window.confirm("Delete this photo permanently?")
+                                ) {
+                                  return;
+                                }
+                                void adminDeleteGalleryItem(item.id)
+                                  .then(reload)
+                                  .catch((err: unknown) =>
+                                    setError(
+                                      err instanceof Error
+                                        ? err.message
+                                        : "Delete failed",
+                                    ),
+                                  );
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </figcaption>
+                      )}
+                    </figure>
+                  );
+                })}
               </div>
             </section>
           );
