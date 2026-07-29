@@ -32,7 +32,7 @@ export function Header() {
     <header className={`site-header ${scrolled || open ? "is-scrolled" : ""}`}>
       <div className="container header-inner">
         <Link to="/" className="brand" onClick={() => setOpen(false)}>
-          <img src="/logo-mark-green.png" alt="" />
+          <img src="/logo-nav.png" alt="Echoes of Praise" className="brand-mark" />
           <span className="brand-text">
             <span className="brand-name">Echoes of Praise</span>
             <span className="brand-place">Nakuru · Kenya</span>

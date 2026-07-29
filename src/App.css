@@ -6,14 +6,24 @@
   transition:
     background 0.4s var(--ease),
     border-color 0.4s var(--ease),
-    backdrop-filter 0.4s var(--ease);
+    backdrop-filter 0.4s var(--ease),
+    box-shadow 0.4s var(--ease);
   border-bottom: 1px solid transparent;
+  /* Soft brand scrim so gold/nav stay readable over the bright choir ceiling */
+  background: linear-gradient(
+    180deg,
+    rgba(7, 17, 14, 0.72) 0%,
+    rgba(7, 17, 14, 0.35) 55%,
+    transparent 100%
+  );
 }
 
 .site-header.is-scrolled {
-  background: rgba(7, 17, 14, 0.78);
-  backdrop-filter: blur(18px) saturate(1.2);
-  border-bottom-color: rgba(205, 177, 103, 0.14);
+  /* Green-tinted glass — matches choir uniforms + logo, not flat black */
+  background: rgba(20, 63, 51, 0.88);
+  backdrop-filter: blur(18px) saturate(1.15);
+  border-bottom-color: rgba(205, 177, 103, 0.22);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.28);
 }
 
 .header-inner {
@@ -28,15 +38,19 @@
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  min-width: 0;
 }
 
-.brand img {
-  width: 46px;
-  height: 46px;
-  object-fit: contain;
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  object-fit: cover;
   border-radius: 50%;
-  outline: 1px solid rgba(205, 177, 103, 0.25);
-  outline-offset: 3px;
+  background: var(--green);
+  box-shadow:
+    0 0 0 1.5px rgba(205, 177, 103, 0.55),
+    0 0 0 4px rgba(7, 17, 14, 0.35);
 }
 
 .brand-text {
@@ -57,7 +71,7 @@
   font-size: 0.62rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--mist-muted);
+  color: rgba(215, 224, 220, 0.72);
   margin-top: 0.2rem;
 }
 
@@ -70,7 +84,7 @@
 .nav-desktop a {
   font-size: 0.86rem;
   font-weight: 500;
-  color: var(--mist-muted);
+  color: rgba(231, 236, 232, 0.78);
   position: relative;
   padding: 0.35rem 0;
   transition: color 0.25s ease;
@@ -108,8 +122,9 @@
   height: 44px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(205, 177, 103, 0.35);
+  border: 1px solid rgba(205, 177, 103, 0.4);
   color: var(--gold);
+  background: rgba(7, 17, 14, 0.25);
 }
 
 .menu-toggle span {
@@ -143,7 +158,7 @@
   flex-direction: column;
   gap: 0.15rem;
   padding: 0.25rem 0 1.5rem;
-  background: rgba(7, 17, 14, 0.96);
+  background: rgba(14, 42, 34, 0.98);
 }
 
 .nav-mobile.open {
