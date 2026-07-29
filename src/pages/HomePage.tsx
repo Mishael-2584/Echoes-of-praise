@@ -245,7 +245,8 @@ export function HomePage() {
           <InView delay={120} className="video-frame">
             <iframe
               title={`${highlightSong.title} — Echoes of Praise`}
-              src={`https://www.youtube-nocookie.com/embed/${highlightSong.youtubeId}?rel=0`}
+              src={`https://www.youtube.com/embed/${highlightSong.youtubeId}?rel=0&modestbranding=1`}
+              referrerPolicy="strict-origin-when-cross-origin"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               loading="lazy"

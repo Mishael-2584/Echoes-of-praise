@@ -1,12 +1,29 @@
-import type { ChoirEvent, Fundraiser, GalleryItem, TicketOrder, TicketTier } from "../types";
+import type {
+  ChoirEvent,
+  Fundraiser,
+  GalleryAlbum,
+  GalleryItem,
+  TicketOrder,
+  TicketTier,
+} from "../types";
 import { clearDataCache } from "./dataCache";
-import { seedEvents, seedFundraisers, seedGallery } from "./seed";
+import { seedEvents, seedFundraisers, seedGallery, seedGalleryAlbums } from "./seed";
 import { isSupabaseConfigured, supabase } from "./supabase";
 
 const DEMO_EVENTS = "eop_demo_events";
 const DEMO_GALLERY = "eop_demo_gallery";
+const DEMO_ALBUMS = "eop_demo_gallery_albums";
 const DEMO_FUNDS = "eop_demo_fundraisers";
 const DEMO_ORDERS = "eop_ticket_orders";
+
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80);
+}
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -142,6 +159,91 @@ export async function adminDeleteEvent(id: string) {
   clearDataCache("events");
 }
 
+export async function adminListGalleryAlbums(): Promise<GalleryAlbum[]> {
+  if (!supabase) return read(DEMO_ALBUMS, seedGalleryAlbums);
+  const { data, error } = await supabase
+    .from("gallery_albums")
+    .select("*")
+    .order("event_date", { ascending: false });
+  if (error) throw error;
+  return (data as GalleryAlbum[]) ?? [];
+}
+
+export async function adminSaveGalleryAlbum(
+  album: Partial<GalleryAlbum> & { title: string },
+): Promise<GalleryAlbum> {
+  const slug = album.slug || slugify(album.title) || `album-${Date.now()}`;
+  const payload = {
+    slug,
+    title: album.title,
+    description: album.description || "",
+    event_date: album.event_date || null,
+    cover_image_url: album.cover_image_url || null,
+    published: album.published ?? true,
+    sort_order: album.sort_order ?? 0,
+  };
+
+  if (!supabase) {
+    const list = read(DEMO_ALBUMS, seedGalleryAlbums);
+    const next: GalleryAlbum = {
+      id: album.id || crypto.randomUUID(),
+      ...payload,
+    };
+    const idx = list.findIndex((a) => a.id === next.id);
+    if (idx >= 0) list[idx] = next;
+    else list.unshift(next);
+    write(DEMO_ALBUMS, list);
+    clearDataCache("gallery-albums");
+    clearDataCache("gallery");
+    return next;
+  }
+
+  if (album.id) {
+    const { data, error } = await supabase
+      .from("gallery_albums")
+      .update(payload)
+      .eq("id", album.id)
+      .select("*")
+      .single();
+    if (error) throw error;
+    clearDataCache("gallery-albums");
+    clearDataCache("gallery");
+    return data as GalleryAlbum;
+  }
+
+  const { data, error } = await supabase
+    .from("gallery_albums")
+    .insert(payload)
+    .select("*")
+    .single();
+  if (error) throw error;
+  clearDataCache("gallery-albums");
+  clearDataCache("gallery");
+  return data as GalleryAlbum;
+}
+
+export async function adminDeleteGalleryAlbum(id: string) {
+  if (!supabase) {
+    write(
+      DEMO_ALBUMS,
+      read(DEMO_ALBUMS, seedGalleryAlbums).filter((a) => a.id !== id),
+    );
+    write(
+      DEMO_GALLERY,
+      read(DEMO_GALLERY, seedGallery).map((g) =>
+        g.album_id === id ? { ...g, album_id: null } : g,
+      ),
+    );
+    clearDataCache("gallery-albums");
+    clearDataCache("gallery");
+    return;
+  }
+  const { error } = await supabase.from("gallery_albums").delete().eq("id", id);
+  if (error) throw error;
+  clearDataCache("gallery-albums");
+  clearDataCache("gallery");
+}
+
 export async function adminListGallery(): Promise<GalleryItem[]> {
   if (!supabase) return read(DEMO_GALLERY, seedGallery);
   const { data, error } = await supabase
@@ -152,7 +254,9 @@ export async function adminListGallery(): Promise<GalleryItem[]> {
   return data as GalleryItem[];
 }
 
-export async function adminSaveGalleryItem(item: Partial<GalleryItem> & { image_url: string }) {
+export async function adminSaveGalleryItem(
+  item: Partial<GalleryItem> & { image_url: string },
+) {
   if (!supabase) {
     const list = read(DEMO_GALLERY, seedGallery);
     const next: GalleryItem = {
@@ -160,35 +264,44 @@ export async function adminSaveGalleryItem(item: Partial<GalleryItem> & { image_
       title: item.title || "",
       caption: item.caption || "",
       image_url: item.image_url,
-      category: item.category || "general",
+      category: item.category || "concerts",
       published: item.published ?? true,
       sort_order: item.sort_order ?? list.length + 1,
       taken_at: item.taken_at || null,
+      album_id: item.album_id ?? null,
     };
     const idx = list.findIndex((g) => g.id === next.id);
     if (idx >= 0) list[idx] = next;
     else list.unshift(next);
     write(DEMO_GALLERY, list);
     clearDataCache("gallery");
+    clearDataCache("gallery-albums");
     return;
   }
 
+  const payload = {
+    title: item.title || "",
+    caption: item.caption || "",
+    image_url: item.image_url,
+    category: item.category || "concerts",
+    published: item.published ?? true,
+    sort_order: item.sort_order ?? 0,
+    taken_at: item.taken_at || null,
+    album_id: item.album_id ?? null,
+  };
+
   if (item.id) {
-    const { error } = await supabase.from("gallery_items").update(item).eq("id", item.id);
+    const { error } = await supabase
+      .from("gallery_items")
+      .update(payload)
+      .eq("id", item.id);
     if (error) throw error;
   } else {
-    const { error } = await supabase.from("gallery_items").insert({
-      title: item.title || "",
-      caption: item.caption || "",
-      image_url: item.image_url,
-      category: item.category || "general",
-      published: item.published ?? true,
-      sort_order: item.sort_order ?? 0,
-      taken_at: item.taken_at || null,
-    });
+    const { error } = await supabase.from("gallery_items").insert(payload);
     if (error) throw error;
   }
   clearDataCache("gallery");
+  clearDataCache("gallery-albums");
 }
 
 export async function adminDeleteGalleryItem(id: string) {
@@ -198,11 +311,13 @@ export async function adminDeleteGalleryItem(id: string) {
       read(DEMO_GALLERY, seedGallery).filter((g) => g.id !== id),
     );
     clearDataCache("gallery");
+    clearDataCache("gallery-albums");
     return;
   }
   const { error } = await supabase.from("gallery_items").delete().eq("id", id);
   if (error) throw error;
   clearDataCache("gallery");
+  clearDataCache("gallery-albums");
 }
 
 export async function adminListFundraisers(): Promise<Fundraiser[]> {

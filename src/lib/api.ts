@@ -2,12 +2,13 @@ import type {
   ChoirEvent,
   DonationInput,
   Fundraiser,
+  GalleryAlbum,
   GalleryItem,
   TicketOrder,
   TicketOrderInput,
   TicketTier,
 } from "../types";
-import { seedEvents, seedFundraisers, seedGallery } from "./seed";
+import { seedEvents, seedFundraisers, seedGallery, seedGalleryAlbums } from "./seed";
 import { isSupabaseConfigured, supabase } from "./supabase";
 import { initiateMpesaPayment, normalizeKenyaPhone } from "./payments";
 
@@ -149,6 +150,100 @@ export async function fetchGallery(): Promise<GalleryItem[]> {
     return seedGallery;
   }
   return (data as GalleryItem[]) ?? [];
+}
+
+export async function fetchGalleryAlbums(): Promise<GalleryAlbum[]> {
+  if (!supabase) {
+    try {
+      const demo = localStorage.getItem("eop_demo_gallery_albums");
+      if (demo) {
+        const albums = JSON.parse(demo) as GalleryAlbum[];
+        const items = await fetchGallery();
+        return albums
+          .filter((a) => a.published)
+          .map((a) => ({
+            ...a,
+            items: items.filter((i) => i.album_id === a.id && i.published),
+          }));
+      }
+    } catch {
+      /* fall through */
+    }
+    return seedGalleryAlbums.map((a) => ({
+      ...a,
+      items: seedGallery.filter((i) => i.album_id === a.id),
+    }));
+  }
+
+  const { data: albums, error } = await supabase
+    .from("gallery_albums")
+    .select("*")
+    .eq("published", true)
+    .order("event_date", { ascending: false })
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    console.warn("[gallery_albums]", error);
+    // Table may not exist yet before migration 006
+    const items = await fetchGallery();
+    if (items.length === 0) return [];
+    return [
+      {
+        id: "legacy",
+        slug: "gallery",
+        title: "Gallery",
+        description: "",
+        event_date: null,
+        cover_image_url: items[0]?.image_url ?? null,
+        published: true,
+        sort_order: 0,
+        items,
+      },
+    ];
+  }
+
+  if (!albums || albums.length === 0) {
+    const items = await fetchGallery();
+    if (items.length === 0) return [];
+    return [
+      {
+        id: "legacy",
+        slug: "gallery",
+        title: "Gallery",
+        description: "Moments from Echoes of Praise",
+        event_date: null,
+        cover_image_url: items[0]?.image_url ?? null,
+        published: true,
+        sort_order: 0,
+        items,
+      },
+    ];
+  }
+
+  const { data: items } = await supabase
+    .from("gallery_items")
+    .select("*")
+    .eq("published", true)
+    .order("sort_order", { ascending: true });
+
+  const photos = (items as GalleryItem[]) ?? [];
+  return (albums as GalleryAlbum[]).map((album) => ({
+    ...album,
+    items: photos.filter((p) => p.album_id === album.id),
+    cover_image_url:
+      album.cover_image_url ||
+      photos.find((p) => p.album_id === album.id)?.image_url ||
+      null,
+  }));
+}
+
+export function formatAlbumDate(iso: string | null): string {
+  if (!iso) return "";
+  return new Intl.DateTimeFormat("en-KE", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(iso));
 }
 
 const LOCAL_ORDERS_KEY = "eop_ticket_orders";

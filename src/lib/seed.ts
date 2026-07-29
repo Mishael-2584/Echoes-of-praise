@@ -1,4 +1,10 @@
-import type { ChoirEvent, Fundraiser, GalleryItem, TicketTier } from "../types";
+import type {
+  ChoirEvent,
+  Fundraiser,
+  GalleryAlbum,
+  GalleryItem,
+  TicketTier,
+} from "../types";
 
 const choirImg = "/images/choir-main.jpg";
 const oneCover = "/images/events/one-concert-cenacle.png";
@@ -255,6 +261,20 @@ const galleryMeta: Array<{ title: string; caption: string; category: string }> =
   { title: "Encore spirit", caption: "One more song for His glory.", category: "concerts" },
 ];
 
+export const seedGalleryAlbums: GalleryAlbum[] = [
+  {
+    id: "album-ministry-moments",
+    slug: "ministry-moments",
+    title: "Ministry moments",
+    description:
+      "Highlights from rehearsals, concerts, and outreach with Echoes of Praise.",
+    event_date: "2025-11-28",
+    cover_image_url: "/images/gallery/eop-02.jpg",
+    published: true,
+    sort_order: 1,
+  },
+];
+
 export const seedGallery: GalleryItem[] = galleryMeta.map((meta, i) => {
   const n = String(i + 1).padStart(2, "0");
   return {
@@ -266,5 +286,6 @@ export const seedGallery: GalleryItem[] = galleryMeta.map((meta, i) => {
     published: true,
     sort_order: i + 1,
     taken_at: "2025-11-28",
+    album_id: "album-ministry-moments",
   };
 });

@@ -35,6 +35,18 @@ export type ChoirEvent = {
   ticket_tiers?: TicketTier[];
 };
 
+export type GalleryAlbum = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  event_date: string | null;
+  cover_image_url: string | null;
+  published: boolean;
+  sort_order: number;
+  items?: GalleryItem[];
+};
+
 export type GalleryItem = {
   id: string;
   title: string;
@@ -44,6 +56,7 @@ export type GalleryItem = {
   published: boolean;
   sort_order: number;
   taken_at: string | null;
+  album_id: string | null;
 };
 
 export type Fundraiser = {

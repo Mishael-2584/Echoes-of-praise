@@ -2798,3 +2798,210 @@
   font-weight: 300;
   line-height: 1.65;
 }
+
+/* —— Event gallery albums —— */
+.album-picker {
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.75rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.album-chip {
+  flex: 0 0 auto;
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid rgba(205, 177, 103, 0.2);
+  background: rgba(7, 17, 14, 0.55);
+  color: var(--mist);
+  max-width: min(280px, 80vw);
+}
+
+.album-chip strong {
+  font-size: 0.95rem;
+  color: var(--white);
+  line-height: 1.3;
+}
+
+.album-chip span {
+  font-size: 0.75rem;
+  color: var(--mist-muted);
+  font-weight: 300;
+}
+
+.album-chip.active {
+  border-color: var(--gold);
+  background: rgba(30, 94, 74, 0.4);
+}
+
+.album-view-head {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+  align-items: center;
+}
+
+@media (min-width: 720px) {
+  .album-view-head {
+    grid-template-columns: minmax(160px, 240px) 1fr;
+    gap: 1.75rem;
+  }
+}
+
+.album-cover {
+  overflow: hidden;
+  border: 1px solid rgba(205, 177, 103, 0.22);
+  aspect-ratio: 4 / 3;
+  background: #0a1813;
+}
+
+.album-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.album-count {
+  margin-top: 0.75rem;
+  color: var(--gold);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.admin-banner-error {
+  border-left-color: var(--danger);
+  background: rgba(196, 92, 74, 0.18);
+  color: #f0cfc8;
+}
+
+.admin-album-list {
+  display: grid;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.admin-album-block header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.admin-album-block h3 {
+  margin: 0;
+  color: var(--gold);
+}
+
+.admin-album-block header p {
+  margin: 0.25rem 0 0;
+  color: var(--mist-muted);
+  font-size: 0.88rem;
+}
+
+.admin-album-block header button {
+  color: var(--danger);
+  white-space: nowrap;
+}
+
+/* —— Mobile / small-screen polish —— */
+@media (max-width: 719px) {
+  :root {
+    --header-h: 4.25rem;
+  }
+
+  .brand-place {
+    display: none;
+  }
+
+  .brand-name {
+    font-size: 0.92rem;
+  }
+
+  .hero-brand {
+    width: min(220px, 62vw);
+  }
+
+  .hero h1 {
+    font-size: clamp(2.4rem, 12vw, 3.4rem);
+  }
+
+  .hero-actions {
+    width: 100%;
+  }
+
+  .hero-actions .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .one-poster img {
+    aspect-ratio: 3 / 4;
+  }
+
+  .testimonial-slide {
+    min-height: 0;
+    padding: 1.35rem 1.15rem;
+  }
+
+  .testimonial-slide p {
+    max-width: none;
+    font-size: 1.1rem;
+  }
+
+  .listen-layout,
+  .mission-epic-grid,
+  .home-split-grid {
+    gap: 1.5rem;
+  }
+
+  .az-nav a,
+  .az-nav span {
+    width: 1.85rem;
+    height: 1.85rem;
+    font-size: 0.72rem;
+  }
+
+  .lead-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .instrument-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .music-team-grid {
+    gap: 2rem;
+  }
+
+  .admin-aside {
+    border-right: 0;
+    border-bottom: 1px solid rgba(205, 177, 103, 0.14);
+  }
+
+  .admin-aside nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .admin-aside nav a {
+    padding: 0.55rem 0.75rem;
+    border: 1px solid rgba(205, 177, 103, 0.16);
+  }
+
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-album-block header {
+    flex-direction: column;
+  }
+}
+

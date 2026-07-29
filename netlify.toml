@@ -24,7 +24,8 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    Content-Security-Policy = "default-src 'self'; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self'; connect-src 'self' https://*.netlify.app https://api.safaricom.co.ke https://sandbox.safaricom.co.ke; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    # Allow Supabase API + YouTube embeds (was blocking admin login and highlight video)
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data: https: blob:; media-src 'self' https: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.netlify.app https://api.safaricom.co.ke https://sandbox.safaricom.co.ke; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://youtube.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
 [[headers]]
   for = "/assets/*"

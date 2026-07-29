@@ -80,8 +80,19 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (error) {
+        const msg = error.message || "Sign-in failed";
+        if (/fetch|network|failed to fetch/i.test(msg)) {
+          throw new Error(
+            "Could not reach Supabase (network/CSP). Confirm VITE_SUPABASE_URL is set and the site was redeployed after CSP updates.",
+          );
+        }
+        throw new Error(msg);
+      }
     },
     [],
   );

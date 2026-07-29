@@ -10,7 +10,7 @@ import { AdminTickets } from "./admin/AdminTickets";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { AdminAuthProvider } from "./lib/adminAuth";
-import { fetchEvents, fetchFundraisers, fetchGallery } from "./lib/api";
+import { fetchEvents, fetchFundraisers, fetchGalleryAlbums } from "./lib/api";
 import { getCached, setCached } from "./lib/dataCache";
 import { AboutPage } from "./pages/AboutPage";
 import { ContactPage } from "./pages/ContactPage";
@@ -39,9 +39,9 @@ function PublicShell({ children }: { children: ReactNode }) {
           /* ignore */
         }
       }
-      if (!getCached("gallery")) {
+      if (!getCached("gallery-albums")) {
         try {
-          setCached("gallery", await fetchGallery());
+          setCached("gallery-albums", await fetchGalleryAlbums());
         } catch {
           /* ignore */
         }
