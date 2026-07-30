@@ -69,6 +69,12 @@ export function MembersPage() {
                       alt={role.name ?? role.title}
                       style={{
                         objectPosition: role.photoPosition ?? "center 20%",
+                        ...(role.photoScale
+                          ? {
+                              transform: `scale(${role.photoScale})`,
+                              transformOrigin: "center top",
+                            }
+                          : null),
                       }}
                     />
                   ) : (

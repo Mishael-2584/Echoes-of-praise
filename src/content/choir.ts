@@ -103,6 +103,8 @@ export type LeadershipRole = {
   photoUrl?: string | null;
   /** CSS object-position for portrait crop */
   photoPosition?: string;
+  /** Zoom factor for full-body shots that need a tighter crop */
+  photoScale?: number;
 };
 
 export const leadershipRoles: LeadershipRole[] = [
@@ -112,7 +114,8 @@ export const leadershipRoles: LeadershipRole[] = [
     summary: "Provides overall vision, leadership, and direction of the ministry.",
     name: "Collince Musumba",
     photoUrl: "/images/leadership/collince-musumba.png",
-    photoPosition: "center 12%",
+    photoPosition: "center top",
+    photoScale: 1.7,
   },
   {
     id: "vice",
