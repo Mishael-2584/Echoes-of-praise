@@ -111,6 +111,8 @@ export const leadershipRoles: LeadershipRole[] = [
     title: "Chairperson / Ministry Leader",
     summary: "Provides overall vision, leadership, and direction of the ministry.",
     name: "Collince Musumba",
+    photoUrl: "/images/leadership/collince-musumba.png",
+    photoPosition: "center 12%",
   },
   {
     id: "vice",
@@ -125,6 +127,8 @@ export const leadershipRoles: LeadershipRole[] = [
     title: "Music Director",
     summary: "Provides musical leadership, repertoire, rehearsals, and performance readiness.",
     name: "Job Sagini",
+    photoUrl: "/images/leadership/job-sagini.png",
+    photoPosition: "center 18%",
   },
   {
     id: "spiritual",

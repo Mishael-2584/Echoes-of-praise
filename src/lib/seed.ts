@@ -8,6 +8,7 @@ import type {
 
 const choirImg = "/images/choir-main.jpg";
 const oneCover = "/images/events/one-concert-cenacle.png";
+const choristersCover = "/images/events/choristers-sabbath-2026.png";
 
 export const seedTiers: Record<string, TicketTier[]> = {
   "hes-risen-2026": [
@@ -106,6 +107,26 @@ export const seedEvents: ChoirEvent[] = [
     featured: true,
     external_ticket_url: null,
     ticket_tiers: seedTiers["one-concert-2026"],
+  },
+  {
+    id: "choristers-sabbath-2026",
+    slug: "choristers-sabbath-2026",
+    title: "Choristers' Sabbath",
+    tagline: "The Password of Thanksgiving · Sunshine SDA Church",
+    description:
+      "Echoes of Praise ministered at Choristers' Sabbath at Sunshine SDA Church—The Password of Thanksgiving—a full Sabbath of worship and choral praise from 8 AM to 6 PM.",
+    starts_at: "2026-05-09T08:00:00+03:00",
+    ends_at: "2026-05-09T18:00:00+03:00",
+    venue: "Sunshine SDA Church",
+    city: "Nakuru",
+    county: "Nakuru",
+    location_notes: "Featuring The Echoes of Praise Choir",
+    cover_image_url: choristersCover,
+    status: "published",
+    is_free: true,
+    featured: false,
+    external_ticket_url: null,
+    ticket_tiers: [],
   },
   {
     id: "hes-risen-2026",
