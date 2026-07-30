@@ -261,6 +261,10 @@
   font-size: 0.84rem;
 }
 
+.footer-credit {
+  color: var(--mist-muted);
+}
+
 .secure-badge {
   color: var(--gold);
   letter-spacing: 0.04em;

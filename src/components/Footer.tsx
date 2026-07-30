@@ -30,6 +30,9 @@ export function Footer() {
       </div>
       <div className="container footer-bottom">
         <span>© {new Date().getFullYear()} Echoes of Praise</span>
+        <span className="footer-credit">
+          Developed by Mishael Gebre Worancha
+        </span>
         <span className="secure-badge" title="TLS encryption on all pages">
           Secure HTTPS payments
         </span>
