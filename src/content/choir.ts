@@ -264,7 +264,7 @@ const MEMBER_NAMES = [
   "Hellen Makori",
   "Hellen Momanyi",
   "Huldah Chepkoech Rotich",
-  "Huldah Tirimba",
+  "Hulda Tirimba",
   "Ivy Bosibori Ondieki",
   "Janet Agasa",
   "Jefferson Bichanga",
