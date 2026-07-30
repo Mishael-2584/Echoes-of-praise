@@ -51,8 +51,8 @@ export function MembersPage() {
             <span className="section-label">Leadership</span>
             <h2 className="section-title">Ministry officers</h2>
             <p className="section-lead">
-              Roles that guide vision, music, spiritual life, and stewardship.
-              Names will appear here as they are confirmed.
+              Officers who steward vision, music, spiritual life, logistics, and
+              communications across the ministry.
             </p>
           </InView>
           <div className="lead-grid">
