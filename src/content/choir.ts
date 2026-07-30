@@ -116,7 +116,9 @@ export const leadershipRoles: LeadershipRole[] = [
     id: "vice",
     title: "Vice Chairperson",
     summary: "Supports the Chairperson and oversees implementation of ministry plans.",
-    name: "Hulda Tirimba",
+    name: "Huldah Tirimba",
+    photoUrl: "/images/leadership/huldah-tirimba.png",
+    photoPosition: "center 18%",
   },
   {
     id: "music",
