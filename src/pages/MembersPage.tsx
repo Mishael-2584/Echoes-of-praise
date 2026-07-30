@@ -57,13 +57,36 @@ export function MembersPage() {
           </InView>
           <div className="lead-grid">
             {leadershipRoles.map((role, i) => (
-              <InView key={role.id} className="lead-card" delay={i * 60}>
-                <span className="lead-index">{String(i + 1).padStart(2, "0")}</span>
-                <h3>{role.title}</h3>
-                <p>{role.summary}</p>
-                <p className="lead-name">
-                  {role.name ?? "Name to be announced"}
-                </p>
+              <InView
+                key={role.id}
+                className={`lead-card ${role.photoUrl ? "has-photo" : ""}`}
+                delay={i * 50}
+              >
+                <div className="lead-photo">
+                  {role.photoUrl ? (
+                    <img
+                      src={role.photoUrl}
+                      alt={role.name ?? role.title}
+                      style={{
+                        objectPosition: role.photoPosition ?? "center 20%",
+                      }}
+                    />
+                  ) : (
+                    <span className="lead-photo-fallback" aria-hidden>
+                      {(role.name ?? role.title).slice(0, 1)}
+                    </span>
+                  )}
+                </div>
+                <div className="lead-body">
+                  <span className="lead-index">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3>{role.title}</h3>
+                  <p className="lead-name">
+                    {role.name ?? "Name to be announced"}
+                  </p>
+                  <p className="lead-summary">{role.summary}</p>
+                </div>
               </InView>
             ))}
           </div>

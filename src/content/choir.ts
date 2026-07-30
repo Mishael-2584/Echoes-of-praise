@@ -100,6 +100,9 @@ export type LeadershipRole = {
   title: string;
   summary: string;
   name: string | null;
+  photoUrl?: string | null;
+  /** CSS object-position for portrait crop */
+  photoPosition?: string;
 };
 
 export const leadershipRoles: LeadershipRole[] = [
@@ -150,12 +153,16 @@ export const leadershipRoles: LeadershipRole[] = [
     title: "Events and Logistics Coordinator",
     summary: "Coordinates events, hospitality, transport, and logistical readiness for ministry engagements.",
     name: "Gift Motari",
+    photoUrl: "/images/leadership/gift-motari.png",
+    photoPosition: "center 18%",
   },
   {
     id: "media",
     title: "Media and Communications Coordinator",
     summary: "Stewards media, messaging, and communications for the ministry.",
     name: "Sandra Metto",
+    photoUrl: "/images/leadership/sandra-metto.png",
+    photoPosition: "center 22%",
   },
   {
     id: "guidance",
