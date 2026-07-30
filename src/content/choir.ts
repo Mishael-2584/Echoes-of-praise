@@ -113,7 +113,7 @@ export const leadershipRoles: LeadershipRole[] = [
     title: "Chairperson / Ministry Leader",
     summary: "Provides overall vision, leadership, and direction of the ministry.",
     name: "Collince Musumba",
-    photoUrl: "/images/leadership/collince-musumba.png",
+    photoUrl: "/images/leadership/collince-musumba-v2.png",
     photoPosition: "center 22%",
   },
   {
