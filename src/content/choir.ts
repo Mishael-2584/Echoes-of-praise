@@ -146,7 +146,7 @@ export const leadershipRoles: LeadershipRole[] = [
     summary: "Official link with Crater Seventh-day Adventist Church, Nakuru, and spiritual counsel for the ministry.",
     name: "James Wanyanga",
     photoUrl: "/images/leadership/james-wanyanga.png",
-    photoPosition: "center 15%",
+    photoPosition: "32% 18%",
   },
   {
     id: "secretary",
