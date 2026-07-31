@@ -162,6 +162,8 @@ export const leadershipRoles: LeadershipRole[] = [
     title: "Treasurer",
     summary: "Stewards ministry finances with accountability and transparency.",
     name: "David Okuthe",
+    photoUrl: "/images/leadership/david-okuthe.png",
+    photoPosition: "center 22%",
   },
   {
     id: "events",
