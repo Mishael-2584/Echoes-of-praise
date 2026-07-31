@@ -113,8 +113,8 @@ export const leadershipRoles: LeadershipRole[] = [
     title: "Chairperson / Ministry Leader",
     summary: "Provides overall vision, leadership, and direction of the ministry.",
     name: "Collince Musumba",
-    photoUrl: "/images/leadership/collince-musumba-v2.png",
-    photoPosition: "center 22%",
+    photoUrl: "/images/leadership/collince-musumba-v3.png",
+    photoPosition: "center 20%",
   },
   {
     id: "vice",
@@ -129,7 +129,7 @@ export const leadershipRoles: LeadershipRole[] = [
     title: "Music Director",
     summary: "Provides musical leadership, repertoire, rehearsals, and performance readiness.",
     name: "Job Sagini",
-    photoUrl: "/images/leadership/job-sagini.png",
+    photoUrl: "/images/leadership/job-sagini-v2.png",
     photoPosition: "center 18%",
   },
   {
@@ -184,6 +184,9 @@ export const leadershipRoles: LeadershipRole[] = [
     title: "Guidance and Restoration Coordinator",
     summary: "Supports guidance, care, and restoration among members of the ministry.",
     name: "Mercy Bore",
+    photoUrl: "/images/leadership/mercy-bore.png",
+    photoPosition: "center 12%",
+    photoScale: 1.45,
   },
 ];
 
