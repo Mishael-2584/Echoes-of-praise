@@ -63,6 +63,15 @@ export type GalleryItem = {
   album_id: string | null;
 };
 
+/** Full choir roster row (admin-managed). */
+export type RosterMember = {
+  id: string;
+  name: string;
+  section: string | null;
+  sort_order: number;
+  published: boolean;
+};
+
 export type Fundraiser = {
   id: string;
   slug: string;

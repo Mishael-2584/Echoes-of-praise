@@ -4,11 +4,18 @@ import type {
   Fundraiser,
   GalleryAlbum,
   GalleryItem,
+  RosterMember,
   TicketOrder,
   TicketOrderInput,
   TicketTier,
 } from "../types";
-import { seedEvents, seedFundraisers, seedGallery, seedGalleryAlbums } from "./seed";
+import {
+  seedChoirMembers,
+  seedEvents,
+  seedFundraisers,
+  seedGallery,
+  seedGalleryAlbums,
+} from "./seed";
 import { isSupabaseConfigured, supabase } from "./supabase";
 import { initiateMpesaPayment, normalizeKenyaPhone } from "./payments";
 
@@ -127,6 +134,43 @@ export async function fetchFundraisers(): Promise<Fundraiser[]> {
     return seedFundraisers;
   }
   return (data as Fundraiser[]) ?? [];
+}
+
+export async function fetchChoirMembers(): Promise<RosterMember[]> {
+  if (!supabase) {
+    try {
+      const demo = localStorage.getItem("eop_demo_choir_members");
+      if (demo) {
+        return (JSON.parse(demo) as RosterMember[])
+          .filter((m) => m.published)
+          .sort((a, b) =>
+            a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+          );
+      }
+    } catch {
+      /* fall through */
+    }
+    return seedChoirMembers
+      .filter((m) => m.published)
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+      );
+  }
+
+  const { data, error } = await supabase
+    .from("choir_members")
+    .select("*")
+    .eq("published", true)
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.warn("[choir_members]", error);
+    return seedChoirMembers.filter((m) => m.published);
+  }
+  if (!data || data.length === 0) {
+    return seedChoirMembers.filter((m) => m.published);
+  }
+  return data as RosterMember[];
 }
 
 export async function fetchGallery(): Promise<GalleryItem[]> {

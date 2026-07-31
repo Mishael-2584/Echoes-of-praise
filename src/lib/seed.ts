@@ -1,8 +1,10 @@
+import { choirMembers as staticChoirMembers } from "../content/choir";
 import type {
   ChoirEvent,
   Fundraiser,
   GalleryAlbum,
   GalleryItem,
+  RosterMember,
   TicketTier,
 } from "../types";
 
@@ -315,3 +317,13 @@ export const seedGallery: GalleryItem[] = galleryMeta.map((meta, i) => {
     album_id: "album-ministry-moments",
   };
 });
+
+export const seedChoirMembers: RosterMember[] = staticChoirMembers.map(
+  (m, i) => ({
+    id: m.id,
+    name: m.name,
+    section: m.section ?? null,
+    sort_order: i + 1,
+    published: true,
+  }),
+);

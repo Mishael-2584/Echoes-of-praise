@@ -178,8 +178,8 @@ export const leadershipRoles: LeadershipRole[] = [
     title: "Media and Communications Coordinator",
     summary: "Stewards media, messaging, and communications for the ministry.",
     name: "Sandra Metto",
-    photoUrl: "/images/leadership/sandra-metto-v3.png",
-    photoPosition: "center 28%",
+    photoUrl: "/images/leadership/sandra-metto-v4.png",
+    photoPosition: "center 30%",
   },
   {
     id: "guidance",

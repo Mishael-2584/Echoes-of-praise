@@ -1,16 +1,18 @@
 import { InView } from "../components/InView";
+import { Loader } from "../components/Loader";
 import {
-  choirMembers,
   conductors,
   instrumentalists,
   leadershipRoles,
-  type ChoirMember,
 } from "../content/choir";
+import { fetchChoirMembers } from "../lib/api";
+import { useCachedResource } from "../lib/useCachedResource";
+import type { RosterMember } from "../types";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-function groupByLetter(members: ChoirMember[]) {
-  const map = new Map<string, ChoirMember[]>();
+function groupByLetter(members: RosterMember[]) {
+  const map = new Map<string, RosterMember[]>();
   for (const letter of LETTERS) map.set(letter, []);
   for (const m of members) {
     const letter = (m.name.trim()[0] || "#").toUpperCase();
@@ -19,15 +21,22 @@ function groupByLetter(members: ChoirMember[]) {
     map.get(key)!.push(m);
   }
   for (const [, list] of map) {
-    list.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+    list.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+    );
   }
   return map;
 }
 
 export function MembersPage() {
-  const byLetter = groupByLetter(choirMembers);
+  const { data, loading, error } = useCachedResource(
+    "choir-members",
+    fetchChoirMembers,
+  );
+  const members = data ?? [];
+  const byLetter = groupByLetter(members);
   const activeLetters = LETTERS.filter((l) => (byLetter.get(l)?.length ?? 0) > 0);
-  const hasRoster = choirMembers.length > 0;
+  const hasRoster = members.length > 0;
 
   return (
     <>
@@ -153,61 +162,68 @@ export function MembersPage() {
             </p>
           </InView>
 
-          <nav className="az-nav" aria-label="Jump to letter">
-            {LETTERS.map((letter) => {
-              const count = byLetter.get(letter)?.length ?? 0;
-              const enabled = count > 0;
-              return enabled ? (
-                <a key={letter} href={`#letter-${letter}`}>
-                  {letter}
-                </a>
-              ) : (
-                <span key={letter} className="az-disabled" aria-disabled>
-                  {letter}
-                </span>
-              );
-            })}
-          </nav>
+          {error && <p className="status-msg err">{error}</p>}
+          {loading && (
+            <Loader label="Loading members…" skeletons={4} className="events-loader" />
+          )}
 
-          {hasRoster ? (
-            <div className="az-blocks">
-              {activeLetters.map((letter) => {
-                const list = byLetter.get(letter) ?? [];
-                return (
-                  <InView
-                    key={letter}
-                    className="az-block"
-                    id={`letter-${letter}`}
-                  >
-                    <header className="az-letter">
-                      <span>{letter}</span>
-                      <em>
-                        {list.length} member{list.length === 1 ? "" : "s"}
-                      </em>
-                    </header>
-                    <ul className="az-names">
-                      {list.map((m) => (
-                        <li key={m.id}>
-                          <strong>{m.name}</strong>
-                          {m.section && <span>{m.section}</span>}
-                        </li>
-                      ))}
-                    </ul>
-                  </InView>
-                );
-              })}
-            </div>
-          ) : (
-            <InView className="roster-empty">
-              <div className="roster-empty-letters" aria-hidden>
-                {LETTERS.map((letter) => (
-                  <span key={letter}>{letter}</span>
-                ))}
-              </div>
-              <p>
-                When names are ready, they will appear here.
-              </p>
-            </InView>
+          {!loading && (
+            <>
+              <nav className="az-nav" aria-label="Jump to letter">
+                {LETTERS.map((letter) => {
+                  const count = byLetter.get(letter)?.length ?? 0;
+                  const enabled = count > 0;
+                  return enabled ? (
+                    <a key={letter} href={`#letter-${letter}`}>
+                      {letter}
+                    </a>
+                  ) : (
+                    <span key={letter} className="az-disabled" aria-disabled>
+                      {letter}
+                    </span>
+                  );
+                })}
+              </nav>
+
+              {hasRoster ? (
+                <div className="az-blocks">
+                  {activeLetters.map((letter) => {
+                    const list = byLetter.get(letter) ?? [];
+                    return (
+                      <InView
+                        key={letter}
+                        className="az-block"
+                        id={`letter-${letter}`}
+                      >
+                        <header className="az-letter">
+                          <span>{letter}</span>
+                          <em>
+                            {list.length} member{list.length === 1 ? "" : "s"}
+                          </em>
+                        </header>
+                        <ul className="az-names">
+                          {list.map((m) => (
+                            <li key={m.id}>
+                              <strong>{m.name}</strong>
+                              {m.section && <span>{m.section}</span>}
+                            </li>
+                          ))}
+                        </ul>
+                      </InView>
+                    );
+                  })}
+                </div>
+              ) : (
+                <InView className="roster-empty">
+                  <div className="roster-empty-letters" aria-hidden>
+                    {LETTERS.map((letter) => (
+                      <span key={letter}>{letter}</span>
+                    ))}
+                  </div>
+                  <p>When names are ready, they will appear here.</p>
+                </InView>
+              )}
+            </>
           )}
         </div>
       </section>

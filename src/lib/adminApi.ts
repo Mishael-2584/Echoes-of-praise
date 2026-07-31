@@ -3,11 +3,18 @@ import type {
   Fundraiser,
   GalleryAlbum,
   GalleryItem,
+  RosterMember,
   TicketOrder,
   TicketTier,
 } from "../types";
 import { clearDataCache } from "./dataCache";
-import { seedEvents, seedFundraisers, seedGallery, seedGalleryAlbums } from "./seed";
+import {
+  seedChoirMembers,
+  seedEvents,
+  seedFundraisers,
+  seedGallery,
+  seedGalleryAlbums,
+} from "./seed";
 import { isSupabaseConfigured, supabase } from "./supabase";
 
 const DEMO_EVENTS = "eop_demo_events";
@@ -15,6 +22,7 @@ const DEMO_GALLERY = "eop_demo_gallery";
 const DEMO_ALBUMS = "eop_demo_gallery_albums";
 const DEMO_FUNDS = "eop_demo_fundraisers";
 const DEMO_ORDERS = "eop_ticket_orders";
+const DEMO_MEMBERS = "eop_demo_choir_members";
 
 function slugify(input: string) {
   return input
@@ -435,6 +443,104 @@ export async function adminListOrders(): Promise<TicketOrder[]> {
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data as TicketOrder[];
+}
+
+export async function adminListChoirMembers(): Promise<RosterMember[]> {
+  if (!supabase) return read(DEMO_MEMBERS, seedChoirMembers);
+  const { data, error } = await supabase
+    .from("choir_members")
+    .select("*")
+    .order("name", { ascending: true });
+  if (error) throw error;
+  return (data as RosterMember[]) ?? [];
+}
+
+export async function adminSaveChoirMember(
+  member: Partial<RosterMember> & { name: string },
+): Promise<RosterMember> {
+  const payload = {
+    name: member.name.trim(),
+    section: member.section?.trim() || null,
+    sort_order: member.sort_order ?? 0,
+    published: member.published ?? true,
+  };
+
+  if (!supabase) {
+    const list = read(DEMO_MEMBERS, seedChoirMembers);
+    const next: RosterMember = {
+      id: member.id || crypto.randomUUID(),
+      ...payload,
+    };
+    const idx = list.findIndex((m) => m.id === next.id);
+    if (idx >= 0) list[idx] = next;
+    else list.push(next);
+    list.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+    );
+    write(DEMO_MEMBERS, list);
+    clearDataCache("choir-members");
+    return next;
+  }
+
+  if (member.id) {
+    const { data, error } = await supabase
+      .from("choir_members")
+      .update(payload)
+      .eq("id", member.id)
+      .select("*")
+      .single();
+    if (error) throw error;
+    clearDataCache("choir-members");
+    return data as RosterMember;
+  }
+
+  const { data, error } = await supabase
+    .from("choir_members")
+    .insert(payload)
+    .select("*")
+    .single();
+  if (error) throw error;
+  clearDataCache("choir-members");
+  return data as RosterMember;
+}
+
+export async function adminDeleteChoirMember(id: string) {
+  if (!supabase) {
+    write(
+      DEMO_MEMBERS,
+      read(DEMO_MEMBERS, seedChoirMembers).filter((m) => m.id !== id),
+    );
+    clearDataCache("choir-members");
+    return;
+  }
+  const { error } = await supabase.from("choir_members").delete().eq("id", id);
+  if (error) throw error;
+  clearDataCache("choir-members");
+}
+
+/** Reassign sort_order alphabetically by name for the whole roster. */
+export async function adminSortChoirMembersAZ(): Promise<RosterMember[]> {
+  const list = await adminListChoirMembers();
+  const sorted = [...list].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
+
+  if (!supabase) {
+    const next = sorted.map((m, i) => ({ ...m, sort_order: i + 1 }));
+    write(DEMO_MEMBERS, next);
+    clearDataCache("choir-members");
+    return next;
+  }
+
+  for (let i = 0; i < sorted.length; i++) {
+    const { error } = await supabase
+      .from("choir_members")
+      .update({ sort_order: i + 1 })
+      .eq("id", sorted[i].id);
+    if (error) throw error;
+  }
+  clearDataCache("choir-members");
+  return adminListChoirMembers();
 }
 
 export async function adminUploadImage(

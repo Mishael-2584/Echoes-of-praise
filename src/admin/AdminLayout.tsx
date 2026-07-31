@@ -4,6 +4,7 @@ import { useAdminAuth } from "../lib/adminAuth";
 const links = [
   { to: "/admin", label: "Overview", end: true },
   { to: "/admin/events", label: "Events" },
+  { to: "/admin/members", label: "Members" },
   { to: "/admin/gallery", label: "Gallery" },
   { to: "/admin/fundraisers", label: "Fundraisers" },
   { to: "/admin/tickets", label: "Tickets" },

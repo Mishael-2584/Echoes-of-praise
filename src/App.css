@@ -2181,6 +2181,35 @@
   font-weight: 300;
 }
 
+.admin-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1.25rem 0 0.85rem;
+}
+
+.admin-toolbar input[type="search"] {
+  flex: 1 1 16rem;
+  max-width: 24rem;
+  background: rgba(7, 17, 14, 0.65);
+  border: 1px solid rgba(205, 177, 103, 0.22);
+  color: var(--mist);
+  padding: 0.65rem 0.85rem;
+}
+
+.admin-toolbar span {
+  color: var(--mist-muted);
+  font-size: 0.85rem;
+}
+
 .admin-stat-grid {
   display: grid;
   gap: 0.85rem;

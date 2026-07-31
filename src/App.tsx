@@ -6,6 +6,7 @@ import { AdminFundraisers } from "./admin/AdminFundraisers";
 import { AdminGallery } from "./admin/AdminGallery";
 import { AdminLayout } from "./admin/AdminLayout";
 import { AdminLogin } from "./admin/AdminLogin";
+import { AdminMembers } from "./admin/AdminMembers";
 import { AdminTickets } from "./admin/AdminTickets";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="events" element={<AdminEvents />} />
+            <Route path="members" element={<AdminMembers />} />
             <Route path="gallery" element={<AdminGallery />} />
             <Route path="fundraisers" element={<AdminFundraisers />} />
             <Route path="tickets" element={<AdminTickets />} />
