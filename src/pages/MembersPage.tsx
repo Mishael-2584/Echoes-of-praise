@@ -39,7 +39,7 @@ export function MembersPage() {
             <p className="section-lead">
               Officers who steward the ministry, conductors who shape the sound,
               instrumentalists who colour every arrangement—and the full choir
-              roster, arranged A–Z.
+              roster.
             </p>
           </InView>
         </div>
@@ -145,11 +145,11 @@ export function MembersPage() {
         <div className="container">
           <InView>
             <span className="section-label">Full roster</span>
-            <h2 className="section-title">Members A–Z</h2>
+            <h2 className="section-title">Members</h2>
             <p className="section-lead">
               {hasRoster
-                ? "Browse the choir alphabetically."
-                : "The alphabetical gallery is ready. Member names will appear under each letter once shared."}
+                ? "Names of those who sing and serve with Echoes of Praise."
+                : "Member names will appear here once shared."}
             </p>
           </InView>
 
@@ -205,8 +205,7 @@ export function MembersPage() {
                 ))}
               </div>
               <p>
-                When names are ready, they will appear under each letter—
-                sorted A–Z for quick browsing.
+                When names are ready, they will appear here.
               </p>
             </InView>
           )}
