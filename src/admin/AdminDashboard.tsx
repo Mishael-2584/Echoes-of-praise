@@ -110,6 +110,7 @@ export function AdminDashboard() {
           <div className="admin-quick">
             <Link to="/admin/events">Manage events & tiers</Link>
             <Link to="/admin/members">Choir roster</Link>
+            <Link to="/admin/contacts">Contact inbox</Link>
             <Link to="/admin/gallery">Upload gallery</Link>
             <Link to="/admin/fundraisers">Campaigns & support</Link>
             <Link to="/admin/tickets">Ticket orders</Link>

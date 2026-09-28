@@ -130,3 +130,67 @@ export type AttendeeAnalytics = {
   county: string;
   count: number;
 };
+
+export type EnquiryType =
+  | "invite"
+  | "tickets"
+  | "partnership"
+  | "media"
+  | "general";
+
+export type ContactStatus =
+  | "new"
+  | "under_review"
+  | "more_info"
+  | "available"
+  | "confirmed"
+  | "declined"
+  | "completed";
+
+export type ContactSettings = {
+  id: number;
+  email: string;
+  whatsapp: string;
+  response_time: string;
+  facebook_url: string;
+  instagram_url: string;
+  youtube_url: string;
+  tiktok_url: string;
+  x_url: string;
+};
+
+export type ContactSubmission = {
+  id: string;
+  enquiry_type: EnquiryType;
+  status: ContactStatus;
+  full_name: string;
+  phone: string;
+  email: string;
+  organisation: string;
+  position_role: string;
+  event_name: string;
+  event_type: string;
+  event_description: string;
+  proposed_date: string | null;
+  performance_time: string;
+  town_venue: string;
+  expected_length: string;
+  expected_attendance: string;
+  sound_system: "" | "yes" | "no" | "not_confirmed";
+  sound_equipment: string;
+  facilitation: string[];
+  facilitation_details: string;
+  programme_notes: string;
+  theme_requests: string;
+  additional_notes: string;
+  attachment_url: string | null;
+  ticket_event_id: string | null;
+  ticket_event_title: string;
+  ticket_reference: string;
+  assistance_required: string;
+  message: string;
+  preferred_response: "" | "phone" | "whatsapp" | "email";
+  admin_notes: string;
+  created_at: string;
+  updated_at?: string;
+};

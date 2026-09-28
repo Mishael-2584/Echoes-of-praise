@@ -7,8 +7,8 @@ export function Footer() {
         <div className="footer-brand">
           <img src="/logo-full.png" alt="Echoes of Praise" />
           <p>
-            An independent Christian choir ministry affiliated with Crater SDA
-            Church, Nakuru—spreading the Gospel through sacred music.
+            An independent Christian choir ministry based in Nakuru,
+            Kenya—spreading the Gospel through sacred music.
           </p>
         </div>
         <div className="footer-col">

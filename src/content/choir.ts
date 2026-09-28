@@ -7,7 +7,7 @@ export const choirProfile = {
   email: "hello@echoesofpraize.com",
   website: "https://echoesofpraize.com",
   affiliation:
-    "An independent Christian choir ministry affiliated with Crater Seventh-day Adventist Church, Nakuru.",
+    "An independent Christian choir ministry based in Nakuru, Kenya—spreading the Gospel through sacred music.",
   nature:
     "Echoes of Praise is a Christian music ministry dedicated to spreading the Gospel through music. The organisation exists to glorify God through sacred music, nurture spiritual growth among its members, and minister to communities through musical evangelism.",
   purpose: [
@@ -78,7 +78,7 @@ export const oneConcert = {
   anniversary: "1-year anniversary celebration",
   dateLabel: "29 November 2026",
   timeLabel: "2:00 PM",
-  venue: "Crater SDA Church, Nakuru",
+  venue: "Nakuru, Kenya",
   guests: [
     {
       name: "The Cenacle Ministry",
@@ -143,7 +143,7 @@ export const leadershipRoles: LeadershipRole[] = [
   {
     id: "liaison",
     title: "Church Liaison / Spiritual Advisor",
-    summary: "Official link with Crater Seventh-day Adventist Church, Nakuru, and spiritual counsel for the ministry.",
+    summary: "Spiritual counsel and partnership support for the ministry’s church and community engagements.",
     name: "James Wanyanga",
     photoUrl: "/images/leadership/james-wanyanga.png",
     photoPosition: "68% 18%",

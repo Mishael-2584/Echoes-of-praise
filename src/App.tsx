@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
+import { AdminContacts } from "./admin/AdminContacts";
 import { AdminDashboard } from "./admin/AdminDashboard";
 import { AdminEvents } from "./admin/AdminEvents";
 import { AdminFundraisers } from "./admin/AdminFundraisers";
@@ -73,6 +74,7 @@ export default function App() {
             <Route index element={<AdminDashboard />} />
             <Route path="events" element={<AdminEvents />} />
             <Route path="members" element={<AdminMembers />} />
+            <Route path="contacts" element={<AdminContacts />} />
             <Route path="gallery" element={<AdminGallery />} />
             <Route path="fundraisers" element={<AdminFundraisers />} />
             <Route path="tickets" element={<AdminTickets />} />

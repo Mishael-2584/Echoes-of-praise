@@ -66,7 +66,7 @@ export function HomePage() {
             alt="Echoes of Praise"
           />
           <p className="hero-kicker reveal reveal-delay-1">
-            {choirProfile.homeBase} · Crater SDA Church affiliation
+            {choirProfile.homeBase}
           </p>
           <h1 className="reveal reveal-delay-2">
             Gospel through <em>music</em>
@@ -100,7 +100,7 @@ export function HomePage() {
             <p className="section-lead">
               {isOneConcert
                 ? featured!.description
-                : "Celebrate one year of ministry with Praise Amplified—guest ministries from Uganda and Kenya, live at Crater SDA Church."}
+                : "Celebrate one year of ministry with Praise Amplified—guest ministries from Uganda and Kenya, live in Nakuru."}
             </p>
           </InView>
 

@@ -1,5 +1,9 @@
 import type {
   ChoirEvent,
+  ContactSettings,
+  ContactStatus,
+  ContactSubmission,
+  EnquiryType,
   Fundraiser,
   GalleryAlbum,
   GalleryItem,
@@ -8,6 +12,7 @@ import type {
   TicketTier,
 } from "../types";
 import { clearDataCache } from "./dataCache";
+import { defaultContactSettings } from "./contactApi";
 import {
   seedChoirMembers,
   seedEvents,
@@ -23,6 +28,8 @@ const DEMO_ALBUMS = "eop_demo_gallery_albums";
 const DEMO_FUNDS = "eop_demo_fundraisers";
 const DEMO_ORDERS = "eop_ticket_orders";
 const DEMO_MEMBERS = "eop_demo_choir_members";
+const DEMO_CONTACTS = "eop_demo_contact_submissions";
+const DEMO_CONTACT_SETTINGS = "eop_demo_contact_settings";
 
 function slugify(input: string) {
   return input
@@ -541,6 +548,104 @@ export async function adminSortChoirMembersAZ(): Promise<RosterMember[]> {
   }
   clearDataCache("choir-members");
   return adminListChoirMembers();
+}
+
+export async function adminListContactSubmissions(): Promise<ContactSubmission[]> {
+  if (!supabase) return read(DEMO_CONTACTS, [] as ContactSubmission[]);
+  const { data, error } = await supabase
+    .from("contact_submissions")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as ContactSubmission[]) ?? [];
+}
+
+export async function adminUpdateContactSubmission(
+  id: string,
+  patch: Partial<Pick<ContactSubmission, "status" | "admin_notes">>,
+): Promise<ContactSubmission> {
+  if (!supabase) {
+    const list = read(DEMO_CONTACTS, [] as ContactSubmission[]);
+    const idx = list.findIndex((c) => c.id === id);
+    if (idx < 0) throw new Error("Submission not found");
+    list[idx] = { ...list[idx], ...patch };
+    write(DEMO_CONTACTS, list);
+    return list[idx];
+  }
+  const { data, error } = await supabase
+    .from("contact_submissions")
+    .update(patch)
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data as ContactSubmission;
+}
+
+export async function adminGetContactSettings(): Promise<ContactSettings> {
+  if (!supabase) return read(DEMO_CONTACT_SETTINGS, defaultContactSettings);
+  const { data, error } = await supabase
+    .from("contact_settings")
+    .select("*")
+    .eq("id", 1)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as ContactSettings) ?? defaultContactSettings;
+}
+
+export async function adminSaveContactSettings(
+  settings: ContactSettings,
+): Promise<ContactSettings> {
+  const payload = {
+    email: settings.email.trim(),
+    whatsapp: settings.whatsapp.trim(),
+    response_time: settings.response_time.trim(),
+    facebook_url: settings.facebook_url.trim(),
+    instagram_url: settings.instagram_url.trim(),
+    youtube_url: settings.youtube_url.trim(),
+    tiktok_url: settings.tiktok_url.trim(),
+    x_url: settings.x_url.trim(),
+  };
+  if (!supabase) {
+    const next = { ...defaultContactSettings, ...payload, id: 1 };
+    write(DEMO_CONTACT_SETTINGS, next);
+    return next;
+  }
+  const { data, error } = await supabase
+    .from("contact_settings")
+    .upsert({ id: 1, ...payload })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data as ContactSettings;
+}
+
+export type ContactFilters = {
+  enquiry_type?: EnquiryType | "all";
+  status?: ContactStatus | "all";
+  date_from?: string;
+  date_to?: string;
+};
+
+export function filterContactSubmissions(
+  list: ContactSubmission[],
+  filters: ContactFilters,
+): ContactSubmission[] {
+  return list.filter((row) => {
+    if (filters.enquiry_type && filters.enquiry_type !== "all") {
+      if (row.enquiry_type !== filters.enquiry_type) return false;
+    }
+    if (filters.status && filters.status !== "all") {
+      if (row.status !== filters.status) return false;
+    }
+    if (filters.date_from && row.proposed_date) {
+      if (row.proposed_date < filters.date_from) return false;
+    }
+    if (filters.date_to && row.proposed_date) {
+      if (row.proposed_date > filters.date_to) return false;
+    }
+    return true;
+  });
 }
 
 export async function adminUploadImage(
