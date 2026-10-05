@@ -60,11 +60,6 @@ export function HomePage() {
         </div>
         <div className="hero-veil" aria-hidden />
         <div className="container hero-content">
-          <img
-            className="hero-brand reveal"
-            src="/logo-full.png"
-            alt="Echoes of Praise"
-          />
           <p className="hero-kicker reveal reveal-delay-1">
             {choirProfile.homeBase}
           </p>
@@ -88,36 +83,49 @@ export function HomePage() {
 
       <section className="section one-concert-section" id="one-concert">
         <div className="container">
-          <InView className="one-concert-intro">
-            <span className="section-label">Upcoming · Featured</span>
-            <p className="one-concert-badge">{oneConcert.anniversary}</p>
-            <h2 className="section-title">
-              {isOneConcert ? featured!.title : oneConcert.title}
-            </h2>
-            <p className="one-theme">
-              Theme: <em>{oneConcert.theme}</em>
-            </p>
-            <p className="section-lead">
-              {isOneConcert
-                ? featured!.description
-                : "Celebrate one year of ministry with Praise Amplified—guest ministries from Uganda and Kenya, live in Nakuru."}
-            </p>
-          </InView>
+          <div className="one-concert-layout">
+            <InView className="one-concert-intro">
+              <span className="section-label">Upcoming · Featured</span>
+              <p className="one-concert-badge">{oneConcert.anniversary}</p>
+              <h2 className="section-title">
+                {isOneConcert ? featured!.title : oneConcert.title}
+              </h2>
+              <p className="one-theme">
+                Theme: <em>{oneConcert.theme}</em>
+              </p>
+              <p className="section-lead">
+                {isOneConcert
+                  ? featured!.description
+                  : "Celebrate one year of ministry with Praise Amplified at Crater SDA Church, Nakuru. Guests include The Cenacle Ministry (Uganda) and Abide. Admission is free."}
+              </p>
+            </InView>
+            <InView className="one-concert-portrait" delay={80}>
+              <img src={oneConcert.portrait} alt="Echoes of Praise" />
+            </InView>
+          </div>
 
           <div className="one-poster-grid">
-            {oneConcert.guests.map((guest, i) => (
-              <InView key={guest.name} className="one-poster" delay={i * 100}>
-                <img
-                  src={guest.image}
-                  alt={`${oneConcert.title} — ${guest.name}`}
-                />
-                <div className="one-poster-caption">
+            {oneConcert.guests.map((guest, i) =>
+              guest.image ? (
+                <InView key={guest.name} className="one-poster" delay={i * 100}>
+                  <img
+                    src={guest.image}
+                    alt={`${oneConcert.title} — ${guest.name}`}
+                  />
+                  <div className="one-poster-caption">
+                    <span>Featuring</span>
+                    <strong>{guest.name}</strong>
+                    {guest.place ? <em>{guest.place}</em> : null}
+                  </div>
+                </InView>
+              ) : (
+                <InView key={guest.name} className="one-guest-card" delay={i * 100}>
                   <span>Featuring</span>
                   <strong>{guest.name}</strong>
-                  <em>{guest.place}</em>
-                </div>
-              </InView>
-            ))}
+                  {guest.place ? <em>{guest.place}</em> : null}
+                </InView>
+              )
+            )}
           </div>
 
           <InView className="one-concert-details" delay={80}>
@@ -133,13 +141,15 @@ export function HomePage() {
               <strong>Where</strong>
               <span>
                 {isOneConcert
-                  ? `${featured!.venue}, ${featured!.city}`
+                  ? [featured!.venue, featured!.city].filter(Boolean).join(", ")
                   : oneConcert.venue}
               </span>
             </div>
             <div className="one-detail">
               <strong>Tickets</strong>
-              <span>{oneConcert.ticketsNote}</span>
+              <span>
+                {featured?.is_free ? "Free admission" : oneConcert.ticketsNote}
+              </span>
             </div>
           </InView>
 
@@ -170,7 +180,7 @@ export function HomePage() {
               <div>
                 <span className="section-label">Anniversary fundraiser</span>
                 <h3>ONE Concert Anniversary Fund</h3>
-                <p>Support Praise Amplified — ticketing coming soon.</p>
+                <p>Raised to purchase a sound system and instruments for the ministry. Goal: KSh 3,000,000.</p>
                 <Link to="/give" className="btn btn-gold">
                   Go to Give
                 </Link>

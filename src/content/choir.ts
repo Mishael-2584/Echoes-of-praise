@@ -73,12 +73,13 @@ export const testimonials: Testimonial[] = [
 /** Featured anniversary concert (also seeded in events). */
 export const oneConcert = {
   slug: "one-concert-2026",
-  title: "Echoes of Praise ONE Concert",
+  title: "Echoes of Praise at ONE Concert",
   theme: "Praise Amplified",
   anniversary: "1-year anniversary celebration",
   dateLabel: "29 November 2026",
   timeLabel: "2:00 PM",
-  venue: "Nakuru, Kenya",
+  venue: "Crater SDA Church, Nakuru",
+  portrait: "/images/choir-main.jpg",
   guests: [
     {
       name: "The Cenacle Ministry",
@@ -86,12 +87,12 @@ export const oneConcert = {
       image: "/images/events/one-concert-cenacle.png",
     },
     {
-      name: "Merge Acapella",
-      place: "Kenya",
-      image: "/images/events/one-concert-emma.png",
+      name: "Abide",
+      place: "",
+      image: "",
     },
   ],
-  ticketsNote: "Ticketing information coming soon",
+  ticketsNote: "Free admission",
   fundraiserSlug: "one-concert-2026",
 };
 

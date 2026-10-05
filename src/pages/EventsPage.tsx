@@ -114,10 +114,10 @@ export function EventsPage() {
                 <div className="featured-meta-row">
                   <strong>Entry</strong>
                   <span>
-                    {(focused.ticket_tiers?.length ?? 0) === 0
-                      ? "Ticketing coming soon"
-                      : focused.is_free
-                        ? "Free registration"
+                    {focused.is_free
+                      ? "Free admission"
+                      : (focused.ticket_tiers?.length ?? 0) === 0
+                        ? "Ticketing coming soon"
                         : "Paid tickets"}
                   </span>
                 </div>
@@ -173,9 +173,11 @@ export function EventsPage() {
               ) : (
                 <div className="tickets-soon">
                   <p>
-                    {isUpcoming(focused)
-                      ? "Ticketing information coming soon."
-                      : "Tickets for this event are closed or were not required."}
+                    {focused.is_free
+                      ? "This concert is free. No ticket is required."
+                      : isUpcoming(focused)
+                        ? "Ticketing information coming soon."
+                        : "Tickets for this event are closed or were not required."}
                   </p>
                   {focused.slug === "one-concert-2026" && (
                     <Link

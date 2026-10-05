@@ -52,6 +52,36 @@ export function isUpcoming(event: ChoirEvent): boolean {
   return new Date(event.starts_at).getTime() >= Date.now() - 6 * 60 * 60 * 1000;
 }
 
+/** Public copy for ONE Concert, including when the database row is still the older version. */
+function withOneConcertCopy(event: ChoirEvent): ChoirEvent {
+  if (event.slug !== "one-concert-2026") return event;
+  const canonical = seedEvents.find((item) => item.slug === "one-concert-2026");
+  if (!canonical) return event;
+  return {
+    ...event,
+    title: canonical.title,
+    tagline: canonical.tagline,
+    description: canonical.description,
+    venue: canonical.venue,
+    city: canonical.city,
+    county: canonical.county,
+    location_notes: canonical.location_notes,
+    is_free: true,
+  };
+}
+
+function withOneConcertFund(fundraiser: Fundraiser): Fundraiser {
+  if (fundraiser.slug !== "one-concert-2026") return fundraiser;
+  const canonical = seedFundraisers.find((item) => item.slug === "one-concert-2026");
+  if (!canonical) return fundraiser;
+  return {
+    ...fundraiser,
+    subtitle: canonical.subtitle,
+    story: canonical.story,
+    goal_kes: canonical.goal_kes,
+  };
+}
+
 function withTiers(events: ChoirEvent[], tiers: TicketTier[]): ChoirEvent[] {
   return events.map((e) => ({
     ...e,
@@ -86,7 +116,7 @@ export async function fetchEvents(): Promise<ChoirEvent[]> {
   if (error) {
     console.warn("[events]", error);
     return seedEvents.map((e) => ({
-      ...e,
+      ...withOneConcertCopy(e),
       ticket_tiers: [...(e.ticket_tiers ?? [])],
     }));
   }
@@ -103,7 +133,7 @@ export async function fetchEvents(): Promise<ChoirEvent[]> {
     .eq("active", true)
     .order("sort_order");
 
-  return withTiers(events as ChoirEvent[], (tiers as TicketTier[]) ?? []);
+  return withTiers(events as ChoirEvent[], (tiers as TicketTier[]) ?? []).map(withOneConcertCopy);
 }
 
 export async function fetchEventBySlug(slug: string): Promise<ChoirEvent | null> {
@@ -119,7 +149,7 @@ export async function fetchFundraisers(): Promise<Fundraiser[]> {
     } catch {
       /* fall through */
     }
-    return seedFundraisers;
+    return seedFundraisers.map(withOneConcertFund);
   }
 
   const { data, error } = await supabase
@@ -131,9 +161,9 @@ export async function fetchFundraisers(): Promise<Fundraiser[]> {
 
   if (error) {
     console.warn("[fundraisers]", error);
-    return seedFundraisers;
+    return seedFundraisers.map(withOneConcertFund);
   }
-  return (data as Fundraiser[]) ?? [];
+  return ((data as Fundraiser[]) ?? []).map(withOneConcertFund);
 }
 
 export async function fetchChoirMembers(): Promise<RosterMember[]> {

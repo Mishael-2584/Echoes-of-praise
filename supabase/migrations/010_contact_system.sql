@@ -1,20 +1,6 @@
 -- Contact submissions + editable public contact settings.
--- Also clears Crater SDA venue wording on ONE Concert if still present.
 -- Safe to re-run.
-
--- ── ONE Concert venue copy (no Crater affiliation) ──────────────────────────
-update public.events
-set
-  venue = case when venue ilike '%crater%' then 'Nakuru' else venue end,
-  description = replace(description, 'live at Crater SDA Church, Nakuru', 'live in Nakuru'),
-  updated_at = now()
-where slug = 'one-concert-2026';
-
-update public.fundraisers
-set
-  story = replace(story, 'ONE Concert at Crater SDA Church, Nakuru', 'ONE Concert in Nakuru'),
-  updated_at = now()
-where slug = 'one-concert-2026';
+-- Venue for ONE Concert is Crater SDA Church, Nakuru (see 011).
 
 -- ── Contact settings (single row) ───────────────────────────────────────────
 create table if not exists public.contact_settings (

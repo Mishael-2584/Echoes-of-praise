@@ -13,18 +13,18 @@ begin
   )
   values (
     'one-concert-2026',
-    'Echoes of Praise ONE Concert',
+    'Echoes of Praise at ONE Concert',
     '1-year anniversary · Theme: Praise Amplified',
-    'Celebrate one year of Echoes of Praise with our anniversary concert—Praise Amplified. Featuring guest choir The Cenacle Ministry (Uganda) and Merge Acapella (Kenya), live in Nakuru. Ticketing information coming soon; you can support the concert through the anniversary fundraiser.',
+    'Celebrate one year of Echoes of Praise with our anniversary concert—Praise Amplified. Featuring The Cenacle Ministry (Uganda) and Abide, live at Crater SDA Church, Nakuru. Admission is free. Gifts toward the anniversary fundraiser purchase a sound system and instruments for the ministry.',
     '2026-11-29 14:00:00+03',
     '2026-11-29 18:00:00+03',
+    'Crater SDA Church',
     'Nakuru',
-    'Nakuru',
-    'Nakuru',
-    'Guests: The Cenacle Ministry (Uganda) · Merge Acapella (Kenya)',
+    '',
+    'Guests: The Cenacle Ministry (Uganda) · Abide. Free admission.',
     base_url || '/images/events/one-concert-cenacle.png',
     'published',
-    false,
+    true,
     true,
     null
   )
@@ -60,10 +60,10 @@ begin
   values (
     'one-concert-2026',
     'ONE Concert Anniversary Fund',
-    'Help us host Praise Amplified — 29 November 2026',
-    'Support Echoes of Praise as we mark one year of ministry with our ONE Concert in Nakuru. Gifts help cover guest hospitality for The Cenacle Ministry (Uganda) and Merge Acapella (Kenya), staging, sound, and production for Praise Amplified. Tickets are not yet on sale—your giving now builds the night.',
+    'Sound system and instruments for the ministry',
+    'This fund is being raised to purchase a sound system and instruments for Echoes of Praise. The goal is KSh 3,000,000. The concert itself—Echoes of Praise at ONE Concert, 29 November 2026 at Crater SDA Church, Nakuru, with The Cenacle Ministry (Uganda) and Abide—is free.',
     'campaign',
-    500000,
+    3000000,
     0,
     true,
     base_url || '/images/events/one-concert-cenacle.png',
