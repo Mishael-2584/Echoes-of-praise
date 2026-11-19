@@ -4546,3 +4546,36 @@
 .nav-mobile a.btn-gold:hover {
   background: linear-gradient(135deg, var(--gold-bright) 0%, var(--gold) 50%, #b79a52 100%);
 }
+
+/* —— Fundraiser progress slide: fit narrow cards, match refreshed surfaces —— */
+.fund-slide,
+.fund-slide > *,
+.campaign-card-body {
+  min-width: 0;
+}
+
+.fund-metrics,
+.fund-slide-compact .fund-metrics {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
+}
+
+.fund-metrics li {
+  min-width: 0;
+  border-radius: var(--radius-sm);
+  border-color: var(--line);
+  box-shadow: var(--highlight);
+}
+
+.fund-metrics strong {
+  overflow-wrap: anywhere;
+}
+
+.progress-stats > div {
+  min-width: 0;
+}
+
+.pay-details {
+  border-radius: var(--radius-md);
+  border-color: var(--line-strong);
+  box-shadow: var(--highlight);
+}
