@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const reducedMotion = () =>
   typeof window !== "undefined" &&
@@ -6,10 +6,12 @@ const reducedMotion = () =>
 
 /**
  * Counts from 0 up to `target` once the element scrolls into view.
- * Returns the ref to attach and the current value.
+ * Returns a callback ref to attach and the current value. The callback ref
+ * (rather than useRef) restarts the effect when the element mounts later,
+ * e.g. after a loading state.
  */
 export function useCountUp<T extends HTMLElement>(target: number, duration = 1600) {
-  const ref = useRef<T | null>(null);
+  const [node, ref] = useState<T | null>(null);
   const [value, setValue] = useState(() => (reducedMotion() ? target : 0));
 
   useEffect(() => {
@@ -17,7 +19,6 @@ export function useCountUp<T extends HTMLElement>(target: number, duration = 160
       setValue(target);
       return;
     }
-    const node = ref.current;
     if (!node) return;
     let raf = 0;
     const io = new IntersectionObserver(
@@ -40,7 +41,7 @@ export function useCountUp<T extends HTMLElement>(target: number, duration = 160
       io.disconnect();
       cancelAnimationFrame(raf);
     };
-  }, [target, duration]);
+  }, [node, target, duration]);
 
   return { ref, value };
 }
