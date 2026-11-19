@@ -5,6 +5,10 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # These values are public (site URL, Supabase project URL, contact address),
+  # so the secrets scan should not fail the build on them. Real secrets such as
+  # SUPABASE_SERVICE_ROLE_KEY and RESEND_API_KEY are still scanned.
+  SECRETS_SCAN_OMIT_KEYS = "CONTACT_FROM_EMAIL,CONTACT_INBOX,SUPABASE_URL,VITE_SITE_URL"
 
 [[redirects]]
   from = "/api/*"
