@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { InView } from "../components/InView";
+import { InstagramCard } from "../components/InstagramCard";
+import { choirProfile } from "../content/choir";
 import { Loader } from "../components/Loader";
 import { fetchEvents, formatEventDate, isUpcoming } from "../lib/api";
 import {
@@ -218,7 +220,10 @@ export function ContactPage() {
   const wa = whatsappHref(whatsapp);
   const socials = [
     { label: "Facebook", href: settings?.facebook_url },
-    { label: "Instagram", href: settings?.instagram_url },
+    {
+      label: "Instagram",
+      href: settings?.instagram_url?.trim() || choirProfile.instagramUrl,
+    },
     { label: "YouTube", href: settings?.youtube_url },
     { label: "TikTok", href: settings?.tiktok_url },
     { label: "X", href: settings?.x_url },
@@ -763,6 +768,7 @@ export function ContactPage() {
                   ))}
                 </div>
               )}
+              <InstagramCard compact />
             </div>
           </InView>
         </div>

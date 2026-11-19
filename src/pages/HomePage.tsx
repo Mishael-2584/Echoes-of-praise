@@ -1,12 +1,21 @@
+import { Fragment } from "react";
 import { Link } from "react-router-dom";
 import { InView } from "../components/InView";
 import { Loader } from "../components/Loader";
 import { TestimonialsSlider } from "../components/TestimonialsSlider";
 import { FundProgressSlide } from "../components/FundProgressSlide";
+import { HeroShowcase } from "../components/HeroShowcase";
+import { Countdown } from "../components/Countdown";
+import { Marquee } from "../components/Marquee";
+import { PosterCarousel, type Poster } from "../components/PosterCarousel";
+import { PromoReels } from "../components/PromoReels";
+import { InstagramCard } from "../components/InstagramCard";
 import {
   choirProfile,
+  heroSlides,
   highlightSong,
   oneConcert,
+  promoReels,
   testimonials,
 } from "../content/choir";
 import {
@@ -39,6 +48,51 @@ function pickFunds(funds: Fundraiser[]) {
   return { ann, campaign };
 }
 
+const concertStartsAt = "2026-11-29T14:00:00+03:00";
+
+const tickerItems = [
+  "Praise Amplified",
+  "ONE Concert",
+  "29 November · 2 PM",
+  "Crater SDA Church, Nakuru",
+  "Free entry · All are welcome",
+  "The Cenacle Ministry · Uganda",
+  "Abide · Nairobi",
+];
+
+const concertPosters: Poster[] = [
+  ...oneConcert.guests
+    .filter((g) => g.image)
+    .map((g) => ({
+      src: g.image,
+      alt: `${oneConcert.title}: featuring ${g.name}`,
+      kicker: "Featuring",
+      title: g.name,
+      place: g.place,
+    })),
+  {
+    src: oneConcert.portrait,
+    alt: "Echoes of Praise choir",
+    kicker: "Your hosts",
+    title: "Echoes of Praise",
+    place: "Nakuru, Kenya",
+  },
+];
+
+function SplitWords({ text, start = 0 }: { text: string; start?: number }) {
+  return (
+    <>
+      {text.split(" ").map((word, i) => (
+        <Fragment key={`${word}-${i}`}>
+          <span className="xp-word">
+            <span style={{ animationDelay: `${start + i * 0.09}s` }}>{word}</span>
+          </span>{" "}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
 export function HomePage() {
   const eventsQ = useCachedResource("events", fetchEvents);
   const fundsQ = useCachedResource("fundraisers", fetchFundraisers);
@@ -54,32 +108,39 @@ export function HomePage() {
 
   return (
     <>
-      <section className="hero hero-epic">
-        <div className="hero-media" aria-hidden>
-          <img className="hero-photo" src="/images/choir-main.jpg" alt="" />
+      <HeroShowcase slides={heroSlides}>
+        <p className="hero-kicker reveal reveal-delay-1">
+          {choirProfile.homeBase}
+        </p>
+        <h1 className="xp-hero-title">
+          <SplitWords text="Gospel through" start={0.2} />
+          <span className="xp-word">
+            <em style={{ animationDelay: "0.4s" }} className="xp-shine-text">
+              music
+            </em>
+          </span>
+        </h1>
+        <p className="hero-lead reveal reveal-delay-3">
+          {choirProfile.tagline}. A Christ-centred choir ministry from Nakuru—
+          sacred harmony for concerts, worship, and evangelism.
+        </p>
+        <div className="hero-actions reveal reveal-delay-4">
+          <a href="#one-concert" className="btn btn-gold xp-sheen">
+            ONE Concert · Nov 29
+          </a>
+          <a href="#promos" className="btn btn-outline">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden>
+              <path d="M8 5.5v13l10.5-6.5z" fill="currentColor" />
+            </svg>
+            Watch the promos
+          </a>
         </div>
-        <div className="hero-veil" aria-hidden />
-        <div className="container hero-content">
-          <p className="hero-kicker reveal reveal-delay-1">
-            {choirProfile.homeBase}
-          </p>
-          <h1 className="reveal reveal-delay-2">
-            Gospel through <em>music</em>
-          </h1>
-          <p className="hero-lead reveal reveal-delay-3">
-            {choirProfile.tagline}. A Christ-centred choir ministry from Nakuru—
-            sacred harmony for concerts, worship, and evangelism.
-          </p>
-          <div className="hero-actions reveal reveal-delay-4">
-            <a href="#one-concert" className="btn btn-gold">
-              ONE Concert · Nov 29
-            </a>
-            <a href="#listen" className="btn btn-outline">
-              Hear our highlight
-            </a>
-          </div>
+        <div className="xp-hero-countdown reveal reveal-delay-4">
+          <Countdown target={concertStartsAt} label="Praise Amplified begins in" />
         </div>
-      </section>
+      </HeroShowcase>
+
+      <Marquee items={tickerItems} />
 
       <section className="section one-concert-section" id="one-concert">
         <div className="container">
@@ -96,36 +157,12 @@ export function HomePage() {
               <p className="section-lead">
                 {isOneConcert
                   ? featured!.description
-                  : "Celebrate one year of ministry with Praise Amplified at Crater SDA Church, Nakuru. Guests include The Cenacle Ministry (Uganda) and Abide. Admission is free."}
+                  : "Celebrate one year of ministry with Praise Amplified at Crater SDA Church, Nakuru. Guests include The Cenacle Ministry (Uganda) and Abide (Nairobi). Admission is free."}
               </p>
             </InView>
-            <InView className="one-concert-portrait" delay={80}>
-              <img src={oneConcert.portrait} alt="Echoes of Praise" />
+            <InView className="xp-concert-posters" delay={80}>
+              <PosterCarousel posters={concertPosters} />
             </InView>
-          </div>
-
-          <div className="one-poster-grid">
-            {oneConcert.guests.map((guest, i) =>
-              guest.image ? (
-                <InView key={guest.name} className="one-poster" delay={i * 100}>
-                  <img
-                    src={guest.image}
-                    alt={`${oneConcert.title} — ${guest.name}`}
-                  />
-                  <div className="one-poster-caption">
-                    <span>Featuring</span>
-                    <strong>{guest.name}</strong>
-                    {guest.place ? <em>{guest.place}</em> : null}
-                  </div>
-                </InView>
-              ) : (
-                <InView key={guest.name} className="one-guest-card" delay={i * 100}>
-                  <span>Featuring</span>
-                  <strong>{guest.name}</strong>
-                  {guest.place ? <em>{guest.place}</em> : null}
-                </InView>
-              )
-            )}
           </div>
 
           <InView className="one-concert-details" delay={80}>
@@ -152,6 +189,19 @@ export function HomePage() {
               </span>
             </div>
           </InView>
+
+          <div className="xp-promos" id="promos">
+            <InView className="xp-promos-head">
+              <span className="section-label">Watch &amp; share</span>
+              <h3 className="xp-promos-title">The road to Praise Amplified</h3>
+              <p>
+                Tap a clip to watch with sound. Share them and bring a friend.
+              </p>
+            </InView>
+            <InView delay={80}>
+              <PromoReels reels={promoReels} />
+            </InView>
+          </div>
 
           <div className="one-fund-strip" aria-busy={dbLoading}>
             {dbLoading ? (
@@ -278,6 +328,16 @@ export function HomePage() {
           </InView>
         </div>
       </section>
+
+      <section className="section xp-ig-section">
+        <div className="container">
+          <InView>
+            <InstagramCard />
+          </InView>
+        </div>
+      </section>
+
+      <Marquee items={["Glorify God", "Spread the Gospel", "Grow together", "Praise Amplified", "Echoes of Praise"]} reverse tone="ink" />
 
       <section className="section home-split-cta">
         <div className="container home-split-grid">

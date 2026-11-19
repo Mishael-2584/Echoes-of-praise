@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import type { Fundraiser } from "../types";
 import { formatKes, formatPercent, fundBalance, progressPercent } from "../lib/api";
+import { useCountUp } from "../lib/motion";
 
 type Props = {
   fundraiser: Fundraiser;
@@ -36,13 +36,8 @@ export function PaymentDetails({ fundraiser }: { fundraiser: Fundraiser }) {
 export function FundProgressSlide({ fundraiser, compact = false }: Props) {
   const goal = fundraiser.goal_kes;
   const raised = fundraiser.raised_kes;
-  const pct = progressPercent(raised, goal);
-  const [width, setWidth] = useState(0);
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setWidth(pct));
-    return () => cancelAnimationFrame(id);
-  }, [pct]);
+  const { ref, value: shown } = useCountUp<HTMLDivElement>(raised, 1800);
+  const shownPct = progressPercent(shown, goal);
 
   if (!fundraiser.show_progress || !goal) {
     return (
@@ -65,14 +60,14 @@ export function FundProgressSlide({ fundraiser, compact = false }: Props) {
         <p className="fund-slide-tagline">{fundraiser.slide_tagline}</p>
       )}
 
-      <div className="progress-wrap">
+      <div className="progress-wrap" ref={ref}>
         <div className="progress-stats">
           <div>
-            <strong>{formatPercent(pct)}%</strong>
+            <strong>{formatPercent(shownPct)}%</strong>
             <div>funded</div>
           </div>
           <div style={{ textAlign: "right" }}>
-            <strong>{formatKes(raised)}</strong>
+            <strong>{formatKes(Math.round(shown))}</strong>
             <div>of {formatKes(goal)}</div>
           </div>
         </div>
@@ -81,10 +76,10 @@ export function FundProgressSlide({ fundraiser, compact = false }: Props) {
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-valuenow={Math.round(pct)}
+          aria-valuenow={Math.round(progressPercent(raised, goal))}
           aria-label="Fundraiser progress"
         >
-          <div className="progress-fill" style={{ width: `${width}%` }} />
+          <div className="progress-fill" style={{ width: `${shownPct}%` }} />
         </div>
       </div>
 

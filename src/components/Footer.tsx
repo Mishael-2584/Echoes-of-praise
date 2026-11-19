@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { InstagramCard, InstagramIcon } from "./InstagramCard";
+import { choirProfile } from "../content/choir";
 
 export function Footer() {
   return (
@@ -25,7 +27,19 @@ export function Footer() {
           <p>Nakuru, Kenya</p>
           <a href="mailto:hello@echoesofpraize.com">hello@echoesofpraize.com</a>
           <a href="https://echoesofpraize.com">echoesofpraize.com</a>
+          <a
+            className="xp-footer-ig"
+            href={choirProfile.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <InstagramIcon size={16} /> @{choirProfile.instagramHandle}
+          </a>
           <p>Payments secured over HTTPS via M-Pesa</p>
+        </div>
+        <div className="footer-col xp-footer-qr">
+          <h3>Scan to follow</h3>
+          <InstagramCard compact />
         </div>
       </div>
       <div className="container footer-bottom">

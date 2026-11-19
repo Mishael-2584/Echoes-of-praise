@@ -11,6 +11,7 @@ import { AdminMembers } from "./admin/AdminMembers";
 import { AdminTickets } from "./admin/AdminTickets";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
+import { ScrollProgress } from "./components/ScrollProgress";
 import { AdminAuthProvider } from "./lib/adminAuth";
 import { fetchEvents, fetchFundraisers, fetchGalleryAlbums } from "./lib/api";
 import { getCached, setCached } from "./lib/dataCache";
@@ -22,6 +23,7 @@ import { GivePage } from "./pages/GivePage";
 import { HomePage } from "./pages/HomePage";
 import { MembersPage } from "./pages/MembersPage";
 import "./App.css";
+import "./experience.css";
 
 function PublicShell({ children }: { children: ReactNode }) {
   useEffect(() => {
@@ -54,6 +56,7 @@ function PublicShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="site-shell">
+      <ScrollProgress />
       <Header />
       <main className="site-main">{children}</main>
       <Footer />

@@ -6,6 +6,9 @@ export const choirProfile = {
   homeBase: "Nakuru, Kenya",
   email: "hello@echoesofpraize.com",
   website: "https://echoesofpraize.com",
+  instagramHandle: "echoesofpraize",
+  instagramUrl: "https://www.instagram.com/echoesofpraize/",
+  instagramQr: "/images/instagram-qr.webp",
   affiliation:
     "An independent Christian choir ministry based in Nakuru, Kenya—spreading the Gospel through sacred music.",
   nature:
@@ -88,8 +91,8 @@ export const oneConcert = {
     },
     {
       name: "Abide",
-      place: "",
-      image: "",
+      place: "Nairobi, Kenya",
+      image: "/images/events/one-concert-abide.jpg",
     },
   ],
   ticketsNote: "Free admission",
@@ -364,3 +367,63 @@ export const choirMembers: ChoirMember[] = MEMBER_NAMES.map((name, i) => ({
   name,
   section: MEMBER_SECTIONS[name],
 }));
+
+export type PromoReel = {
+  id: string;
+  title: string;
+  caption: string;
+  src: string;
+  poster: string;
+  orientation: "landscape" | "portrait";
+};
+
+/** Promotional clips for ONE Concert · Praise Amplified (29 Nov 2026). */
+export const promoReels: PromoReel[] = [
+  {
+    id: "are-you-ready",
+    title: "Nakuru, are you ready?",
+    caption: "The choir sends the invitation.",
+    src: "/media/promo/are-you-ready.mp4",
+    poster: "/media/promo/are-you-ready.jpg",
+    orientation: "landscape",
+  },
+  {
+    id: "see-you-there",
+    title: "See you there",
+    caption: "Friends of the ministry on why they're coming.",
+    src: "/media/promo/see-you-there.mp4",
+    poster: "/media/promo/see-you-there.jpg",
+    orientation: "landscape",
+  },
+  {
+    id: "cenacle",
+    title: "The Cenacle Ministry",
+    caption: "Our guests from Uganda join Praise Amplified.",
+    src: "/media/promo/cenacle-praise-amplified.mp4",
+    poster: "/media/promo/cenacle-praise-amplified.jpg",
+    orientation: "portrait",
+  },
+  {
+    id: "dont-be-like-okudhe",
+    title: "Don't be like Okudhe",
+    caption: "A little warning from the choir family.",
+    src: "/media/promo/dont-be-like-okudhe.mp4",
+    poster: "/media/promo/dont-be-like-okudhe.jpg",
+    orientation: "landscape",
+  },
+  {
+    id: "nov-29",
+    title: "29 November 2026",
+    caption: "Save the date: Crater SDA Church, 2 PM.",
+    src: "/media/promo/nov-29-teaser.mp4",
+    poster: "/media/promo/nov-29-teaser.jpg",
+    orientation: "landscape",
+  },
+];
+
+/** Hero slideshow frames (home page). */
+export const heroSlides = [
+  { src: "/images/choir-main.jpg", position: "center 35%", caption: "Echoes of Praise · Nakuru" },
+  { src: "/images/gallery/eop-02.jpg", position: "center 45%", caption: "In concert" },
+  { src: "/images/gallery/eop-08.jpg", position: "center 55%", caption: "Lifting the sound" },
+];
