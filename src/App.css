@@ -3795,3 +3795,630 @@
   }
 }
 
+
+/* ==========================================================================
+   Modern refresh — same palette and wording, softer geometry,
+   layered depth, glass surfaces and calmer interaction states.
+   ========================================================================== */
+
+/* —— Header —— */
+.site-header.is-scrolled {
+  background: rgba(16, 52, 42, 0.78);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border-bottom-color: rgba(205, 177, 103, 0.16);
+  box-shadow:
+    inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+    0 12px 36px -12px rgba(0, 0, 0, 0.45);
+}
+
+.brand-mark {
+  transition: transform 0.5s var(--ease-out), box-shadow 0.35s ease;
+}
+
+.brand:hover .brand-mark {
+  transform: rotate(-6deg) scale(1.04);
+  box-shadow:
+    0 0 0 1.5px var(--gold),
+    0 0 0 5px rgba(205, 177, 103, 0.12);
+}
+
+@media (min-width: 920px) {
+  .nav-desktop {
+    gap: 0.2rem;
+    padding: 0.3rem;
+    border-radius: 999px;
+    border: 1px solid rgba(205, 177, 103, 0.14);
+    background: rgba(7, 17, 14, 0.32);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--highlight);
+  }
+
+  .nav-desktop a {
+    padding: 0.5rem 0.95rem;
+    border-radius: 999px;
+    letter-spacing: 0.01em;
+    transition:
+      color 0.25s ease,
+      background 0.3s ease;
+  }
+
+  .nav-desktop a::after {
+    left: 50%;
+    right: auto;
+    bottom: 0.22rem;
+    width: 0;
+    height: 2px;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: width 0.35s var(--ease-out);
+  }
+
+  .nav-desktop a:hover {
+    background: rgba(205, 177, 103, 0.08);
+  }
+
+  .nav-desktop a.active {
+    background: rgba(205, 177, 103, 0.12);
+    color: var(--gold-bright);
+  }
+
+  .nav-desktop a:hover::after,
+  .nav-desktop a.active::after {
+    right: auto;
+    width: 1rem;
+  }
+}
+
+.site-header .nav-cta {
+  padding: 0.7rem 1.35rem;
+}
+
+.menu-toggle {
+  border-radius: 12px;
+  background: rgba(7, 17, 14, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.menu-toggle:hover {
+  border-color: var(--gold);
+  background: rgba(205, 177, 103, 0.1);
+}
+
+.nav-mobile {
+  background: transparent;
+  padding-bottom: 1.25rem;
+}
+
+.nav-mobile.open {
+  animation: fade-in 0.3s ease;
+}
+
+.nav-mobile a {
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  border-bottom: 0;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.nav-mobile a:hover {
+  background: rgba(205, 177, 103, 0.06);
+}
+
+.nav-mobile a.active {
+  background: rgba(205, 177, 103, 0.1);
+}
+
+/* —— Section labels —— */
+.section-label::before {
+  background: linear-gradient(90deg, transparent, currentColor);
+}
+
+.hero-kicker::before {
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+
+.section-title {
+  letter-spacing: -0.03em;
+}
+
+/* —— Shared surfaces (cards / panels) —— */
+.event-card,
+.campaign-card,
+.ticket-panel,
+.fundraiser-panel,
+.home-split-card,
+.testimonial-slide,
+.one-fund-strip,
+.about-panel,
+.lead-card,
+.conductor-card,
+.instrument-card,
+.album-card,
+.contact-aside .contact-card,
+.contact-tickets-panel,
+.roster-empty {
+  border-radius: var(--radius-lg);
+  border-color: var(--line);
+  box-shadow: var(--highlight), var(--shadow-md);
+}
+
+.event-card,
+.campaign-card,
+.ticket-panel,
+.fundraiser-panel,
+.home-split-card,
+.testimonial-slide,
+.one-fund-strip,
+.about-panel,
+.album-card {
+  overflow: hidden;
+}
+
+.event-card,
+.campaign-card,
+.home-split-card,
+.lead-card,
+.conductor-card,
+.instrument-card,
+.album-card,
+.contact-aside .contact-card {
+  transition:
+    transform 0.5s var(--ease-out),
+    border-color 0.35s ease,
+    box-shadow 0.5s var(--ease-out);
+}
+
+.event-card:hover,
+.campaign-card:hover,
+.home-split-card:hover,
+.lead-card:hover,
+.conductor-card:hover,
+.instrument-card:hover,
+.album-card:hover,
+.contact-aside .contact-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--line-strong);
+  box-shadow: var(--highlight), var(--shadow-lg), var(--glow-gold);
+}
+
+/* Top accent sheen on feature panels */
+.home-split-card,
+.one-fund-strip,
+.testimonial-slide {
+  position: relative;
+}
+
+.home-split-card::before,
+.one-fund-strip::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(205, 177, 103, 0.55), transparent);
+  pointer-events: none;
+}
+
+.home-split-card {
+  padding: clamp(2rem, 3.5vw, 2.6rem) clamp(1.6rem, 3vw, 2.35rem);
+}
+
+.fundraiser-panel::before {
+  height: 3px;
+}
+
+.ticket-panel::before {
+  border-radius: 0 3px 3px 0;
+}
+
+.testimonial-slide {
+  border-top-width: 1px;
+  border-top-color: var(--line);
+  background:
+    radial-gradient(ellipse 60% 80% at 0% 0%, rgba(30, 94, 74, 0.4), transparent 60%),
+    rgba(7, 17, 14, 0.72);
+}
+
+.testimonial-slide::before {
+  content: "\201C";
+  position: absolute;
+  top: -0.6rem;
+  right: 1.5rem;
+  font-family: var(--font-display);
+  font-size: 9rem;
+  line-height: 1;
+  color: rgba(205, 177, 103, 0.12);
+  pointer-events: none;
+}
+
+.testimonial-nav {
+  border-radius: 50%;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.3s var(--ease-out);
+}
+
+.testimonial-nav:hover {
+  border-color: var(--gold);
+  transform: scale(1.06);
+}
+
+.testimonial-dots button {
+  transition: width 0.35s var(--ease-out), background 0.25s ease;
+}
+
+.testimonial-dots button.active {
+  width: 1.5rem;
+  border-radius: 999px;
+  transform: none;
+}
+
+/* —— Inner frames follow the softer radius —— */
+.about-panel::before,
+.featured-visual-frame {
+  border-radius: calc(var(--radius-lg) - 8px);
+}
+
+.video-frame,
+.one-poster,
+.featured-visual,
+.about-photo,
+.album-cover,
+.lightbox,
+.modal {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.video-frame::before {
+  border-radius: calc(var(--radius-lg) - 6px);
+}
+
+.video-frame,
+.one-poster,
+.featured-visual,
+.about-photo {
+  border-color: var(--line);
+  box-shadow: var(--highlight), var(--shadow-lg);
+}
+
+.one-poster {
+  transition: transform 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out);
+}
+
+.one-poster:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--highlight), var(--shadow-lg), var(--glow-gold);
+}
+
+.one-concert-badge {
+  border-radius: 999px;
+  padding: 0.42rem 0.95rem;
+  box-shadow: 0 6px 18px -8px rgba(205, 177, 103, 0.6);
+}
+
+.one-concert-details {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.4rem;
+  background: rgba(7, 17, 14, 0.35);
+}
+
+/* —— Events —— */
+.event-card {
+  background: linear-gradient(180deg, var(--ink-elevated), var(--ink-2));
+}
+
+.event-card-media img {
+  transition: transform 0.8s var(--ease-out);
+}
+
+.event-card:hover .event-card-media.has-photo img {
+  transform: scale(1.04);
+}
+
+.event-date-pill {
+  padding: 0.38rem 0.8rem;
+  border: 1px solid rgba(205, 177, 103, 0.35);
+  border-radius: 999px;
+  background: rgba(205, 177, 103, 0.08);
+}
+
+.events-tabs {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(7, 17, 14, 0.5);
+  box-shadow: var(--highlight);
+}
+
+.events-tabs button {
+  padding: 0.6rem 1.25rem;
+  border-radius: 999px;
+  border-bottom: 0;
+  margin-bottom: 0;
+  transition: background 0.3s ease, color 0.25s ease;
+}
+
+.events-tabs button:hover {
+  color: var(--white);
+}
+
+.events-tabs button.active {
+  background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+  color: var(--ink);
+  box-shadow: 0 6px 18px -8px rgba(205, 177, 103, 0.6);
+}
+
+.ticket-tier {
+  border-radius: var(--radius-md);
+  box-shadow: var(--highlight);
+}
+
+.ticket-tier.selected {
+  box-shadow: var(--highlight), 0 0 0 1px var(--gold), var(--glow-gold);
+}
+
+.ticket-panel-media {
+  border-radius: var(--radius-md);
+}
+
+/* —— Progress —— */
+.progress-track {
+  border-radius: 999px;
+  background: rgba(215, 224, 220, 0.08);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.progress-fill {
+  border-radius: 999px;
+  box-shadow: 0 0 16px rgba(205, 177, 103, 0.35);
+}
+
+.progress-fill::after {
+  display: none;
+}
+
+.milestone.done span:first-child::before {
+  border-radius: 50%;
+}
+
+/* —— Modal & forms —— */
+.modal-backdrop {
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+}
+
+.modal {
+  border-color: var(--line-strong);
+  box-shadow: var(--highlight), var(--shadow-lg);
+  padding: 1.85rem;
+}
+
+.modal.modal-wide {
+  overflow: auto;
+}
+
+.modal-close,
+.lightbox-close {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.modal-close:hover,
+.lightbox-close:hover {
+  background: rgba(205, 177, 103, 0.12);
+}
+
+.form-field input,
+.form-field select,
+.contact-form input,
+.contact-form select,
+.contact-form textarea {
+  border-radius: 12px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.25s ease,
+    background 0.2s ease;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.contact-form input:focus,
+.contact-form select:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  background: rgba(7, 17, 14, 0.85);
+  box-shadow: 0 0 0 4px rgba(205, 177, 103, 0.14);
+}
+
+.contact-form input[type="checkbox"],
+.contact-form input[type="radio"] {
+  width: auto;
+  accent-color: var(--gold);
+  box-shadow: none;
+}
+
+.contact-form fieldset {
+  border-radius: var(--radius-md);
+  border-color: var(--line);
+  background: rgba(7, 17, 14, 0.25);
+  padding: 1.35rem 1.3rem 1.45rem;
+}
+
+.contact-type-option {
+  border-radius: 12px;
+  transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+
+.contact-type-option:hover {
+  border-color: var(--line-strong);
+}
+
+.contact-type-option.active {
+  box-shadow: 0 0 0 1px rgba(205, 177, 103, 0.4) inset;
+}
+
+.preset-amounts button {
+  border-radius: 999px;
+}
+
+.payment-note,
+.contact-notice {
+  border-radius: 0 12px 12px 0;
+}
+
+.checkout-summary {
+  border-radius: var(--radius-md);
+}
+
+/* —— Gallery —— */
+.gallery-item {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+}
+
+.gallery-item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.album-card-cta {
+  border-radius: 999px;
+}
+
+.album-chip {
+  border-radius: 999px;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.album-chip:hover {
+  border-color: var(--line-strong);
+}
+
+/* —— Members —— */
+.person-avatar {
+  box-shadow: 0 0 0 4px rgba(205, 177, 103, 0.06);
+}
+
+.az-nav a,
+.az-nav span {
+  border-radius: 50%;
+}
+
+.az-nav a {
+  transition: background 0.25s ease, transform 0.3s var(--ease-out);
+}
+
+.az-nav a:hover {
+  transform: translateY(-2px);
+}
+
+.lead-card .lead-photo img {
+  transition: transform 0.8s var(--ease-out);
+}
+
+.lead-card:hover .lead-photo img {
+  transform: scale(1.03);
+}
+
+/* —— Footer —— */
+.site-footer {
+  border-top: 0;
+}
+
+.site-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(205, 177, 103, 0.45), transparent);
+}
+
+.footer-col a {
+  width: fit-content;
+  transition: color 0.2s ease, transform 0.3s var(--ease-out);
+}
+
+.footer-col a:hover {
+  color: var(--gold-bright);
+  transform: translateX(3px);
+}
+
+/* —— Loaders —— */
+.loader-skeleton-card {
+  border-radius: var(--radius-lg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-card:hover,
+  .campaign-card:hover,
+  .home-split-card:hover,
+  .lead-card:hover,
+  .conductor-card:hover,
+  .instrument-card:hover,
+  .album-card:hover,
+  .one-poster:hover,
+  .gallery-item:hover,
+  .footer-col a:hover,
+  .az-nav a:hover,
+  .brand:hover .brand-mark {
+    transform: none;
+  }
+}
+
+/* Radio / checkbox rows sit inline with their text */
+.contact-form .contact-type-option,
+.contact-inline-options label,
+.contact-check-grid label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--mist);
+}
+
+.contact-form input[type="radio"],
+.contact-form input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 919px) {
+  .site-header .nav-cta {
+    padding: 0.6rem 1.05rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 719px) {
+  /* Keep the site gutter on the mobile hero (it is also a .container) */
+  .hero-epic .hero-content.container {
+    width: calc(100% - 2.5rem);
+  }
+}
+
+.nav-mobile a.btn-gold {
+  margin-top: 0.75rem;
+  color: var(--ink);
+  justify-content: center;
+}
+
+.nav-mobile a.btn-gold:hover {
+  background: linear-gradient(135deg, var(--gold-bright) 0%, var(--gold) 50%, #b79a52 100%);
+}
