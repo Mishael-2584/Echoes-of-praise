@@ -343,7 +343,14 @@ export async function adminListFundraisers(): Promise<Fundraiser[]> {
     ascending: false,
   });
   if (error) throw error;
-  return data as Fundraiser[];
+  return (data as Fundraiser[]).map((fund) => ({
+    ...fund,
+    paybill: fund.paybill ?? "",
+    account_number: fund.account_number ?? "",
+    account_name: fund.account_name ?? "",
+    slide_kicker: fund.slide_kicker ?? "",
+    slide_tagline: fund.slide_tagline ?? "",
+  }));
 }
 
 export async function adminSaveFundraiser(
@@ -361,6 +368,11 @@ export async function adminSaveFundraiser(
       goal_kes: fund.goal_kes ?? null,
       raised_kes: fund.raised_kes ?? 0,
       show_progress: fund.show_progress ?? false,
+      paybill: fund.paybill ?? "",
+      account_number: fund.account_number ?? "",
+      account_name: fund.account_name ?? "",
+      slide_kicker: fund.slide_kicker ?? "",
+      slide_tagline: fund.slide_tagline ?? "",
       cover_image_url: fund.cover_image_url || "/images/choir-main.jpg",
       active: fund.active ?? true,
       archived_at: fund.archived_at ?? null,
@@ -385,6 +397,11 @@ export async function adminSaveFundraiser(
     goal_kes: fund.goal_kes ?? null,
     raised_kes: fund.raised_kes ?? 0,
     show_progress: fund.show_progress ?? false,
+    paybill: fund.paybill ?? "",
+    account_number: fund.account_number ?? "",
+    account_name: fund.account_name ?? "",
+    slide_kicker: fund.slide_kicker ?? "",
+    slide_tagline: fund.slide_tagline ?? "",
     cover_image_url: fund.cover_image_url || null,
     active: fund.active ?? true,
     archived_at: fund.archived_at ?? null,
@@ -393,12 +410,36 @@ export async function adminSaveFundraiser(
     ends_at: fund.ends_at || null,
   };
 
-  if (fund.id) {
-    const { error } = await supabase.from("fundraisers").update(payload).eq("id", fund.id);
+  const writeFund = async (body: Record<string, unknown>) => {
+    if (fund.id) {
+      const { error } = await supabase.from("fundraisers").update(body).eq("id", fund.id);
+      if (error) throw error;
+      return;
+    }
+    const { error } = await supabase.from("fundraisers").insert(body);
     if (error) throw error;
-  } else {
-    const { error } = await supabase.from("fundraisers").insert(payload);
-    if (error) throw error;
+  };
+
+  try {
+    await writeFund(payload);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const missingSlideColumn =
+      /paybill|account_number|account_name|slide_kicker|slide_tagline|schema cache|column/i.test(
+        message,
+      );
+    if (!missingSlideColumn) throw err;
+    const rest = { ...payload };
+    delete rest.paybill;
+    delete rest.account_number;
+    delete rest.account_name;
+    delete rest.slide_kicker;
+    delete rest.slide_tagline;
+    await writeFund(rest);
+    clearDataCache("fundraisers");
+    throw new Error(
+      "Cash received and target were saved. Run supabase/migrations/012_fundraiser_slide.sql in the Supabase SQL editor so paybill, account number, and slide text can be saved too.",
+    );
   }
   clearDataCache("fundraisers");
 }

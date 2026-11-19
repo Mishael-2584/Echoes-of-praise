@@ -1,5 +1,6 @@
 import { useEffect, useId, useState, type FormEvent } from "react";
 import type { Fundraiser } from "../types";
+import { PaymentDetails } from "./FundProgressSlide";
 import { createDonation, formatKes } from "../lib/api";
 
 type Props = {
@@ -122,10 +123,12 @@ export function DonateModal({ open, onClose, fundraiser }: Props) {
               onChange={(e) => setForm({ ...form, donor_city: e.target.value })}
             />
           </div>
+          <PaymentDetails fundraiser={fundraiser} />
           <div className="payment-note">
             <span>
-              Gifts settle via secure HTTPS M-Pesa into the choir account. Thank you for
-              lifting Echoes of Praise.
+              {fundraiser.paybill
+                ? "You can also send the gift with the M-Pesa paybill above. Thank you for lifting Echoes of Praise."
+                : "Gifts settle via secure HTTPS M-Pesa into the choir account. Thank you for lifting Echoes of Praise."}
             </span>
           </div>
           <button type="submit" className="btn btn-gold" style={{ width: "100%" }} disabled={busy}>

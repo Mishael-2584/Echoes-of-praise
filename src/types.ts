@@ -82,6 +82,16 @@ export type Fundraiser = {
   goal_kes: number | null;
   raised_kes: number;
   show_progress: boolean;
+  /** M-Pesa paybill shown on the progress slide */
+  paybill: string;
+  /** M-Pesa account number shown on the progress slide */
+  account_number: string;
+  /** Name next to the account number */
+  account_name: string;
+  /** Small label above the progress slide */
+  slide_kicker: string;
+  /** Line under the progress heading */
+  slide_tagline: string;
   cover_image_url: string | null;
   active: boolean;
   /** Soft-delete timestamp — row kept as backup when set */

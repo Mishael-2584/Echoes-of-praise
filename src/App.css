@@ -751,6 +751,13 @@
   max-width: 36ch;
 }
 
+.home-split-card .pay-details p,
+.home-split-card .fund-slide-open {
+  max-width: none;
+  margin-bottom: 0;
+  color: var(--mist);
+}
+
 .home-split-give {
   background:
     radial-gradient(ellipse at bottom right, rgba(205, 177, 103, 0.12), transparent 50%),
@@ -979,24 +986,31 @@
 
 @media (min-width: 800px) {
   .one-fund-strip {
-    grid-template-columns: 1.4fr auto;
-    align-items: end;
-    gap: 2rem;
+    gap: 1.75rem;
     padding: 2rem 2rem;
   }
 }
 
-.one-fund-strip h3 {
+.one-fund-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem 1.5rem;
+}
+
+.one-fund-strip h3,
+.fund-slide-title {
   margin: 0.35rem 0 0.5rem;
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 3vw, 2rem);
   color: var(--white);
 }
 
-.one-fund-strip p {
+.one-fund-head p {
   color: var(--mist-muted);
   font-weight: 300;
-  margin: 0 0 1rem;
+  margin: 0;
 }
 
 .one-fund-actions {
@@ -1373,6 +1387,116 @@
   bottom: -4px;
   width: 2px;
   background: var(--white);
+}
+
+.fund-slide {
+  display: grid;
+  gap: 1rem;
+}
+
+.fund-slide .section-label {
+  margin-bottom: 0;
+}
+
+.fund-slide-tagline {
+  margin: 0;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.15rem;
+}
+
+.fund-slide-open {
+  color: var(--mist-muted);
+  font-weight: 300;
+  margin: 0;
+}
+
+.fund-metrics {
+  list-style: none;
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.25rem 0 0;
+  padding: 0;
+}
+
+@media (min-width: 700px) {
+  .fund-metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.fund-metrics li {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(205, 177, 103, 0.22);
+  background: rgba(7, 17, 14, 0.45);
+}
+
+.fund-metrics span {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mist-muted);
+}
+
+.fund-metrics strong {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.pay-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem 1.25rem;
+  margin-top: 0.35rem;
+  padding: 0.9rem 1rem;
+  background: var(--green-deep);
+  border: 1px solid rgba(205, 177, 103, 0.28);
+}
+
+.pay-details p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.65rem;
+  margin: 0;
+}
+
+.pay-details-brand {
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--white);
+  font-size: 1.05rem;
+}
+
+.pay-details span {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(215, 224, 220, 0.72);
+}
+
+.pay-details strong {
+  color: var(--gold);
+  font-size: 1.25rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+}
+
+.pay-details em {
+  color: var(--mist);
+  font-style: normal;
+  font-size: 0.92rem;
+}
+
+.modal .pay-details {
+  margin-bottom: 0.85rem;
 }
 
 .milestones {

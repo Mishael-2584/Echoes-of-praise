@@ -45,7 +45,18 @@ export function formatEventTime(iso: string): string {
 
 export function progressPercent(raised: number, goal: number | null): number {
   if (!goal || goal <= 0) return 0;
-  return Math.min(100, Math.round((raised / goal) * 1000) / 10);
+  return Math.min(100, Math.round((raised / goal) * 10000) / 100);
+}
+
+export function formatPercent(value: number): string {
+  return new Intl.NumberFormat("en-KE", {
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+export function fundBalance(goal: number | null, raised: number): number {
+  if (!goal || goal <= 0) return 0;
+  return Math.max(0, goal - raised);
 }
 
 export function isUpcoming(event: ChoirEvent): boolean {
@@ -70,15 +81,47 @@ function withOneConcertCopy(event: ChoirEvent): ChoirEvent {
   };
 }
 
-function withOneConcertFund(fundraiser: Fundraiser): Fundraiser {
-  if (fundraiser.slug !== "one-concert-2026") return fundraiser;
-  const canonical = seedFundraisers.find((item) => item.slug === "one-concert-2026");
-  if (!canonical) return fundraiser;
+function withSlideFields(fundraiser: Fundraiser): Fundraiser {
   return {
     ...fundraiser,
+    paybill: fundraiser.paybill ?? "",
+    account_number: fundraiser.account_number ?? "",
+    account_name: fundraiser.account_name ?? "",
+    slide_kicker: fundraiser.slide_kicker ?? "",
+    slide_tagline: fundraiser.slide_tagline ?? "",
+  };
+}
+
+function withOneConcertFund(fundraiser: Fundraiser): Fundraiser {
+  const row = withSlideFields(fundraiser);
+  if (row.slug !== "one-concert-2026") return row;
+  const canonical = seedFundraisers.find((item) => item.slug === "one-concert-2026");
+  if (!canonical) return row;
+  const managed = Boolean(row.paybill.trim() || row.account_number.trim());
+  if (managed) {
+    return {
+      ...row,
+      paybill: row.paybill || canonical.paybill,
+      account_number: row.account_number || canonical.account_number,
+      account_name: row.account_name || canonical.account_name,
+      slide_kicker: row.slide_kicker || canonical.slide_kicker,
+      slide_tagline: row.slide_tagline || canonical.slide_tagline,
+      goal_kes: row.goal_kes ?? canonical.goal_kes,
+    };
+  }
+  return {
+    ...row,
     subtitle: canonical.subtitle,
     story: canonical.story,
-    goal_kes: canonical.goal_kes,
+    goal_kes:
+      !row.goal_kes || row.goal_kes === 500000 ? canonical.goal_kes : row.goal_kes,
+    raised_kes: row.raised_kes > 0 ? row.raised_kes : canonical.raised_kes,
+    show_progress: true,
+    paybill: canonical.paybill,
+    account_number: canonical.account_number,
+    account_name: canonical.account_name,
+    slide_kicker: canonical.slide_kicker,
+    slide_tagline: canonical.slide_tagline,
   };
 }
 

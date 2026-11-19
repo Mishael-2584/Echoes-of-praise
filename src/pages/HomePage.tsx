@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { InView } from "../components/InView";
 import { Loader } from "../components/Loader";
 import { TestimonialsSlider } from "../components/TestimonialsSlider";
-import { ProgressBar } from "../components/ProgressBar";
+import { FundProgressSlide } from "../components/FundProgressSlide";
 import {
   choirProfile,
   highlightSong,
@@ -158,23 +158,25 @@ export function HomePage() {
               <Loader compact label="Loading fundraiser…" />
             ) : anniversaryFund ? (
               <>
-                <div>
-                  <span className="section-label">Anniversary fundraiser</span>
-                  <h3>{anniversaryFund.title}</h3>
-                  <p>{anniversaryFund.subtitle}</p>
-                  <ProgressBar fundraiser={anniversaryFund} compact />
+                <div className="one-fund-head">
+                  <div>
+                    <span className="section-label">Anniversary fundraiser</span>
+                    <h3>{anniversaryFund.title}</h3>
+                    <p>{anniversaryFund.subtitle}</p>
+                  </div>
+                  <div className="one-fund-actions">
+                    <Link to="/give" className="btn btn-gold">
+                      Support the concert
+                    </Link>
+                    <Link
+                      to={featured ? `/events/${featured.slug}` : "/events"}
+                      className="btn btn-outline"
+                    >
+                      {ticketsReady ? "Get tickets" : "Event details"}
+                    </Link>
+                  </div>
                 </div>
-                <div className="one-fund-actions">
-                  <Link to="/give" className="btn btn-gold">
-                    Support the concert
-                  </Link>
-                  <Link
-                    to={featured ? `/events/${featured.slug}` : "/events"}
-                    className="btn btn-outline"
-                  >
-                    {ticketsReady ? "Get tickets" : "Event details"}
-                  </Link>
-                </div>
+                <FundProgressSlide fundraiser={anniversaryFund} />
               </>
             ) : (
               <div>
@@ -298,7 +300,7 @@ export function HomePage() {
                 <span className="section-label">Campaign</span>
                 <h2>{campaign.title}</h2>
                 <p>{campaign.subtitle}</p>
-                <ProgressBar fundraiser={campaign} compact />
+                <FundProgressSlide fundraiser={campaign} compact />
                 <Link
                   to="/give"
                   className="btn btn-outline"

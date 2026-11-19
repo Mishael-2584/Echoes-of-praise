@@ -2,7 +2,7 @@ import { useState } from "react";
 import { DonateModal } from "../components/DonateModal";
 import { InView } from "../components/InView";
 import { Loader } from "../components/Loader";
-import { ProgressBar } from "../components/ProgressBar";
+import { FundProgressSlide } from "../components/FundProgressSlide";
 import { fetchFundraisers } from "../lib/api";
 import { useCachedResource } from "../lib/useCachedResource";
 import type { Fundraiser } from "../types";
@@ -68,7 +68,7 @@ export function GivePage() {
                     </button>
                   </div>
                   <div className="fundraiser-panel">
-                    <ProgressBar fundraiser={fund} />
+                    <FundProgressSlide fundraiser={fund} />
                   </div>
                 </InView>
               ))}
@@ -95,7 +95,7 @@ export function GivePage() {
                         <div className="campaign-card-body">
                           <h3>{fund.title}</h3>
                           <p>{fund.subtitle}</p>
-                          <ProgressBar fundraiser={fund} compact />
+                          <FundProgressSlide fundraiser={fund} />
                           <button
                             type="button"
                             className="btn btn-green"
