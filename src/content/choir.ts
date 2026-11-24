@@ -215,6 +215,11 @@ export const conductors: Conductor[] = [
     title: "Conductor",
     note: "Also saxophone & clarinet",
   },
+  {
+    id: "c-rispah-momanyi",
+    name: "Rispah Momanyi",
+    title: "Conductor",
+  },
 ];
 
 export type Instrumentalist = {
@@ -352,6 +357,7 @@ const MEMBER_NAMES = [
 const MEMBER_SECTIONS: Record<string, string> = {
   "Shiphrah Musumba": "Conductor",
   "Job Sagini": "Conductor · Saxophone / Clarinet",
+  "Rispah Momanyi": "Conductor",
   "Job Ngugi": "Bass",
   "Isaiah Gidayi": "Organ / Piano",
   "Janice Ayiemba": "Violin",
