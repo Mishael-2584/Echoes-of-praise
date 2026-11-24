@@ -302,7 +302,7 @@ const MEMBER_NAMES = [
   "Kahama Nderitu Kibaara",
   "Kareem Kelly",
   "Kathleen Berly",
-  "Keila Okwano",
+  "Keila Owano",
   "Kyle Ogola",
   "Marlin King",
   "Marsha Mokeira",
