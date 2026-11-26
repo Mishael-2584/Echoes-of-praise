@@ -41,6 +41,83 @@ function timestamp() {
   );
 }
 
+/**
+ * KCB Buni M-Pesa Express (STK Push). Used instead of Daraja when the
+ * KCB_* variables are set. Sandbox (UAT) by default.
+ */
+async function kcbStkPush(opts: {
+  phone: string;
+  amount: number;
+  reference: string;
+  description: string;
+  callbackUrl: string;
+}) {
+  const key = process.env.KCB_CONSUMER_KEY!;
+  const secret = process.env.KCB_CONSUMER_SECRET!;
+  const account = process.env.KCB_ACCOUNT_NUMBER!;
+  const tokenUrl =
+    process.env.KCB_TOKEN_URL || "https://accounts.buni.kcbgroup.com/oauth2/token";
+  const apiBase =
+    process.env.KCB_API_BASE || "https://uat.buni.kcbgroup.com/mm/api/request/1.0.0";
+
+  const auth = Buffer.from(`${key}:${secret}`).toString("base64");
+  const tokenRes = await fetch(tokenUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: "grant_type=client_credentials",
+  });
+  if (!tokenRes.ok) {
+    console.error("[kcb-stk] token error", tokenRes.status, await tokenRes.text());
+    throw new Error("Unable to authenticate with KCB");
+  }
+  const { access_token } = (await tokenRes.json()) as { access_token?: string };
+  if (!access_token) throw new Error("Missing KCB access token");
+
+  const payload = {
+    phoneNumber: opts.phone,
+    amount: String(opts.amount),
+    invoiceNumber: `${account}-${opts.reference}`,
+    callbackUrl: opts.callbackUrl,
+    transactionDescription: opts.description,
+  };
+  const res = await fetch(`${apiBase}/stkpush`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${access_token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const text = await res.text();
+  // Logged so the sandbox request/response can be shared with KCB.
+  console.info("[kcb-stk] request", JSON.stringify(payload));
+  console.info("[kcb-stk] response", res.status, text);
+
+  let data: {
+    header?: { statusCode?: string; statusDescription?: string };
+    response?: {
+      CheckoutRequestID?: string;
+      MerchantRequestID?: string;
+      ResponseCode?: string | number;
+      CustomerMessage?: string;
+      ResponseDescription?: string;
+    };
+  } = {};
+  try {
+    data = JSON.parse(text);
+  } catch {
+    /* non-JSON error body */
+  }
+  const ok =
+    res.ok &&
+    String(data.header?.statusCode ?? "") === "0" &&
+    String(data.response?.ResponseCode ?? "0") === "0";
+  return { ok, data, status: res.status, text };
+}
+
 export const handler: Handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
     return json(204, {});
@@ -81,6 +158,43 @@ export const handler: Handler = async (event) => {
   const callbackUrl =
     process.env.MPESA_CALLBACK_URL ||
     `${process.env.URL || process.env.DEPLOY_PRIME_URL || ""}/api/mpesa-callback`;
+
+  if (
+    process.env.KCB_CONSUMER_KEY &&
+    process.env.KCB_CONSUMER_SECRET &&
+    process.env.KCB_ACCOUNT_NUMBER
+  ) {
+    try {
+      const r = await kcbStkPush({
+        phone,
+        amount,
+        reference,
+        description,
+        callbackUrl,
+      });
+      if (!r.ok) {
+        return json(502, {
+          message:
+            r.data.response?.CustomerMessage ||
+            r.data.response?.ResponseDescription ||
+            r.data.header?.statusDescription ||
+            "KCB gateway rejected the request.",
+        });
+      }
+      return json(200, {
+        message:
+          r.data.response?.CustomerMessage ||
+          "STK Push sent. Enter your M-Pesa PIN on your phone to complete payment.",
+        checkoutRequestId: r.data.response?.CheckoutRequestID,
+        kind,
+      });
+    } catch (err) {
+      console.error("[kcb-stk]", err);
+      return json(500, {
+        message: "Secure payment gateway unavailable. Please try again shortly.",
+      });
+    }
+  }
 
   // Demo / local mode when credentials are not configured yet
   if (!consumerKey || !consumerSecret || !shortcode || !passkey) {
