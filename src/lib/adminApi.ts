@@ -408,7 +408,9 @@ export async function adminSaveFundraiser(
     event_id: fund.event_id || null,
     starts_at: fund.starts_at || null,
     ends_at: fund.ends_at || null,
-  };
+  } as Record<string, unknown>;
+  // While live counting, the database owns the total; never overwrite it from the form.
+  if (fund.live_counting) delete payload.raised_kes;
 
   const writeFund = async (body: Record<string, unknown>) => {
     if (fund.id) {
@@ -442,6 +444,70 @@ export async function adminSaveFundraiser(
     );
   }
   clearDataCache("fundraisers");
+}
+
+export type KcbPayment = {
+  id: string;
+  transaction_id: string;
+  amount_kes: number;
+  payer_name: string;
+  payer_phone: string;
+  reference: string;
+  narration: string;
+  notification_type: string;
+  signature_verified: boolean;
+  counted: boolean;
+  received_at: string;
+};
+
+const LIVE_MIGRATION_HINT =
+  "Run supabase/migrations/018_kcb_live_counting.sql in the Supabase SQL editor first.";
+
+/** Set the starting figure and begin adding KCB payments to the total. */
+export async function adminStartLiveCounting(id: string, startKes: number) {
+  if (!supabase) throw new Error("Live counting needs the live database.");
+  const { error } = await supabase
+    .from("fundraisers")
+    .update({
+      raised_kes: Math.max(0, Math.round(startKes)),
+      live_counting: true,
+      live_started_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) {
+    if (/live_counting|live_started_at|column/i.test(error.message)) {
+      throw new Error(LIVE_MIGRATION_HINT);
+    }
+    throw error;
+  }
+  clearDataCache("fundraisers");
+}
+
+export async function adminStopLiveCounting(id: string) {
+  if (!supabase) throw new Error("Live counting needs the live database.");
+  const { error } = await supabase
+    .from("fundraisers")
+    .update({ live_counting: false, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+  clearDataCache("fundraisers");
+}
+
+export async function adminListKcbPayments(limit = 50): Promise<KcbPayment[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("kcb_payments")
+    .select(
+      "id, transaction_id, amount_kes, payer_name, payer_phone, reference, narration, notification_type, signature_verified, counted, received_at",
+    )
+    .order("received_at", { ascending: false })
+    .limit(limit);
+  if (error) {
+    if (/kcb_payments|schema cache|does not exist/i.test(error.message)) return [];
+    throw error;
+  }
+  return (data as KcbPayment[]) ?? [];
 }
 
 /** Soft-delete: hide from public, keep row as backup. */

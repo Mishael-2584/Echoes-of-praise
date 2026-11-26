@@ -2,9 +2,13 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   adminArchiveFundraiser,
   adminListFundraisers,
+  adminListKcbPayments,
   adminRestoreFundraiser,
   adminSaveFundraiser,
+  adminStartLiveCounting,
+  adminStopLiveCounting,
   adminUploadImage,
+  type KcbPayment,
 } from "../lib/adminApi";
 import { formatKes, formatPercent, fundBalance, progressPercent } from "../lib/api";
 import { seedFundraisers } from "../lib/seed";
@@ -44,6 +48,81 @@ export function AdminFundraisers() {
   const [tab, setTab] = useState<"active" | "archived">("active");
   const [busy, setBusy] = useState(false);
   const [slide, setSlide] = useState<Fundraiser | null>(null);
+  const [liveStart, setLiveStart] = useState<string>("");
+  const [payments, setPayments] = useState<KcbPayment[]>([]);
+
+  const live = Boolean(slide?.live_counting);
+
+  async function refreshLive() {
+    const [next, pays] = await Promise.all([reload(), adminListKcbPayments(50)]);
+    setPayments(pays);
+    const row = next.find((item) => item.slug === "one-concert-2026");
+    if (row) {
+      setSlide((cur) =>
+        cur
+          ? {
+              ...cur,
+              raised_kes: row.raised_kes,
+              live_counting: row.live_counting,
+              live_started_at: row.live_started_at,
+            }
+          : prefillSlide(row),
+      );
+    }
+  }
+
+  useEffect(() => {
+    void adminListKcbPayments(50).then(setPayments).catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    if (!live) return;
+    const t = window.setInterval(() => void refreshLive().catch(() => undefined), 15000);
+    return () => window.clearInterval(t);
+  }, [live]);
+
+  async function startLive() {
+    if (!slide) return;
+    const start = liveStart.trim() === "" ? slide.raised_kes : Number(liveStart);
+    if (!Number.isFinite(start) || start < 0) {
+      setError("Enter a valid starting figure.");
+      return;
+    }
+    if (
+      !window.confirm(
+        `Start live counting from ${formatKes(start)}? Every verified KCB payment from now on will be added to the bar.`,
+      )
+    ) {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await adminStartLiveCounting(slide.id, start);
+      setMessage(`Live counting started from ${formatKes(start)}.`);
+      setLiveStart("");
+      await refreshLive();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not start live counting");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function stopLive() {
+    if (!slide) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await adminStopLiveCounting(slide.id);
+      setMessage("Live counting stopped. The bar keeps its current total.");
+      await refreshLive();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not stop live counting");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function reload() {
     const next = await adminListFundraisers();
@@ -218,10 +297,11 @@ export function AdminFundraisers() {
               />
             </label>
             <label>
-              Cash received (KES)
+              Cash received (KES){live ? " — counting live" : ""}
               <input
                 type="number"
                 min={0}
+                disabled={live}
                 value={slide.raised_kes}
                 onChange={(e) =>
                   setSlide({ ...slide, raised_kes: Number(e.target.value) || 0 })
@@ -273,6 +353,110 @@ export function AdminFundraisers() {
             </button>
           </div>
         </form>
+      )}
+
+      {slide && (
+        <section className="admin-form">
+          <h2>Live counting (KCB)</h2>
+          {live ? (
+            <p className="admin-muted">
+              <strong>Counting live</strong> since{" "}
+              {slide.live_started_at
+                ? new Date(slide.live_started_at).toLocaleString("en-KE")
+                : "—"}
+              . Current total {formatKes(slide.raised_kes)}. Verified payments to till{" "}
+              {slide.account_number || "8148850"} are added automatically; this page
+              refreshes every 15 seconds.
+            </p>
+          ) : (
+            <p className="admin-muted">
+              Enter the starting figure (for example the total on the morning of the
+              concert) and press Start. Only payments KCB reports after that moment
+              are added, so nothing is counted twice.
+            </p>
+          )}
+          <div className="admin-form-grid">
+            {!live && (
+              <label>
+                Starting figure (KES)
+                <input
+                  type="number"
+                  min={0}
+                  placeholder={String(slide.raised_kes)}
+                  value={liveStart}
+                  onChange={(e) => setLiveStart(e.target.value)}
+                />
+              </label>
+            )}
+          </div>
+          <div className="admin-form-actions">
+            {live ? (
+              <button
+                type="button"
+                className="btn btn-outline"
+                disabled={busy}
+                onClick={() => void stopLive()}
+              >
+                Stop counting
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-gold"
+                disabled={busy}
+                onClick={() => void startLive()}
+              >
+                Start live counting
+              </button>
+            )}
+            <button
+              type="button"
+              className="btn btn-outline"
+              disabled={busy}
+              onClick={() => void refreshLive().catch(() => undefined)}
+            >
+              Refresh
+            </button>
+          </div>
+
+          <h3>Payments received from KCB</h3>
+          {payments.length === 0 ? (
+            <p className="admin-muted">No KCB payment notifications yet.</p>
+          ) : (
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Amount</th>
+                    <th>Reference</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payments.map((p) => (
+                    <tr key={p.id}>
+                      <td>{new Date(p.received_at).toLocaleString("en-KE")}</td>
+                      <td>{p.payer_name || "—"}</td>
+                      <td>{p.payer_phone || "—"}</td>
+                      <td>{formatKes(Number(p.amount_kes))}</td>
+                      <td>{p.transaction_id}</td>
+                      <td>
+                        {p.counted
+                          ? "Added to bar"
+                          : p.signature_verified
+                            ? "Not counting"
+                            : "Unverified"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
       )}
 
       <div className="admin-tabs">

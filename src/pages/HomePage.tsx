@@ -95,7 +95,9 @@ function SplitWords({ text, start = 0 }: { text: string; start?: number }) {
 
 export function HomePage() {
   const eventsQ = useCachedResource("events", fetchEvents);
-  const fundsQ = useCachedResource("fundraisers", fetchFundraisers);
+  const fundsQ = useCachedResource("fundraisers", fetchFundraisers, {
+    refreshMs: 30000,
+  });
 
   const dbLoading = eventsQ.loading || fundsQ.loading;
   const featured = eventsQ.data ? pickFeatured(eventsQ.data) : null;

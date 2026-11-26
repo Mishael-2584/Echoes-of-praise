@@ -54,7 +54,7 @@ async function kcbStkPush(opts: {
 }) {
   const key = process.env.KCB_CONSUMER_KEY!;
   const secret = process.env.KCB_CONSUMER_SECRET!;
-  const account = process.env.KCB_ACCOUNT_NUMBER!;
+  const account = (process.env.KCB_TILL_NUMBER || process.env.KCB_ACCOUNT_NUMBER)!;
   const tokenUrl =
     process.env.KCB_TOKEN_URL || "https://accounts.buni.kcbgroup.com/oauth2/token";
   const apiBase =
@@ -162,7 +162,7 @@ export const handler: Handler = async (event) => {
   if (
     process.env.KCB_CONSUMER_KEY &&
     process.env.KCB_CONSUMER_SECRET &&
-    process.env.KCB_ACCOUNT_NUMBER
+    (process.env.KCB_TILL_NUMBER || process.env.KCB_ACCOUNT_NUMBER)
   ) {
     try {
       const r = await kcbStkPush({

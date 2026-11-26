@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { getCached, setCached } from "./dataCache";
 
-export function useCachedResource<T>(key: string, fetcher: () => Promise<T>) {
+export function useCachedResource<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  options: { refreshMs?: number } = {},
+) {
+  const { refreshMs } = options;
   const fetcherRef = useRef(fetcher);
   fetcherRef.current = fetcher;
 
@@ -40,6 +45,28 @@ export function useCachedResource<T>(key: string, fetcher: () => Promise<T>) {
       alive = false;
     };
   }, [key]);
+
+  // Optional background refresh (e.g. the live fundraiser bar).
+  useEffect(() => {
+    if (!refreshMs) return;
+    let alive = true;
+    const tick = () => {
+      if (document.visibilityState === "hidden") return;
+      fetcherRef
+        .current()
+        .then((result) => {
+          if (!alive) return;
+          setCached(key, result);
+          setData(result);
+        })
+        .catch(() => undefined);
+    };
+    const t = window.setInterval(tick, refreshMs);
+    return () => {
+      alive = false;
+      window.clearInterval(t);
+    };
+  }, [key, refreshMs]);
 
   return { data, loading, error };
 }

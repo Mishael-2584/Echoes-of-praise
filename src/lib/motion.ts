@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const reducedMotion = () =>
   typeof window !== "undefined" &&
@@ -13,6 +13,9 @@ const reducedMotion = () =>
 export function useCountUp<T extends HTMLElement>(target: number, duration = 1600) {
   const [node, ref] = useState<T | null>(null);
   const [value, setValue] = useState(() => (reducedMotion() ? target : 0));
+  // Last value shown, so a live update animates from there instead of from 0.
+  const shownRef = useRef(value);
+  shownRef.current = value;
 
   useEffect(() => {
     if (reducedMotion()) {
@@ -25,11 +28,12 @@ export function useCountUp<T extends HTMLElement>(target: number, duration = 160
       ([entry]) => {
         if (!entry.isIntersecting) return;
         io.disconnect();
+        const from = shownRef.current;
         const start = performance.now();
         const tick = (now: number) => {
           const t = Math.min(1, (now - start) / duration);
           const eased = 1 - Math.pow(1 - t, 4);
-          setValue(target * eased);
+          setValue(from + (target - from) * eased);
           if (t < 1) raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);

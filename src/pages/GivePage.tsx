@@ -11,6 +11,7 @@ export function GivePage() {
   const { data, loading, error } = useCachedResource(
     "fundraisers",
     fetchFundraisers,
+    { refreshMs: 30000 },
   );
   const fundraisers = data ?? [];
   const [active, setActive] = useState<Fundraiser | null>(null);

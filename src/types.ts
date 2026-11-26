@@ -92,6 +92,9 @@ export type Fundraiser = {
   slide_kicker: string;
   /** Line under the progress heading */
   slide_tagline: string;
+  /** When true, verified KCB payments are added to raised_kes as they arrive */
+  live_counting?: boolean;
+  live_started_at?: string | null;
   cover_image_url: string | null;
   active: boolean;
   /** Soft-delete timestamp — row kept as backup when set */
