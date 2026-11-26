@@ -1,4 +1,5 @@
 import type { Handler } from "@netlify/functions";
+import { logStk } from "./_stk-log";
 
 /**
  * Safaricom Daraja STK callback.
@@ -30,6 +31,20 @@ export const handler: Handler = async (event) => {
       resultDesc: callback?.ResultDesc,
       checkoutRequestId: callback?.CheckoutRequestID,
       metadata: callback?.CallbackMetadata?.Item,
+    });
+
+    // Saved for the admin panel. Informational only: never counted toward
+    // the fundraiser (anyone can POST here; KCB IPN is the trusted source).
+    const items = callback?.CallbackMetadata?.Item ?? [];
+    const item = (name: string) => items.find((i) => i.Name === name)?.Value;
+    await logStk({
+      kind: "callback",
+      checkout_request_id: callback?.CheckoutRequestID,
+      phone: String(item("PhoneNumber") ?? ""),
+      amount_kes: item("Amount") != null ? Number(item("Amount")) : null,
+      result_code: String(callback?.ResultCode ?? ""),
+      result_desc: callback?.ResultDesc ?? "",
+      response: payload,
     });
 
     // Acknowledge quickly — Daraja expects a fast 200.

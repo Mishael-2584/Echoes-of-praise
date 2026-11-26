@@ -3,12 +3,14 @@ import {
   adminArchiveFundraiser,
   adminListFundraisers,
   adminListKcbPayments,
+  adminListStkLog,
   adminRestoreFundraiser,
   adminSaveFundraiser,
   adminStartLiveCounting,
   adminStopLiveCounting,
   adminUploadImage,
   type KcbPayment,
+  type StkLogEntry,
 } from "../lib/adminApi";
 import { formatKes, formatPercent, fundBalance, progressPercent } from "../lib/api";
 import { seedFundraisers } from "../lib/seed";
@@ -50,12 +52,18 @@ export function AdminFundraisers() {
   const [slide, setSlide] = useState<Fundraiser | null>(null);
   const [liveStart, setLiveStart] = useState<string>("");
   const [payments, setPayments] = useState<KcbPayment[]>([]);
+  const [stkLog, setStkLog] = useState<StkLogEntry[]>([]);
 
   const live = Boolean(slide?.live_counting);
 
   async function refreshLive() {
-    const [next, pays] = await Promise.all([reload(), adminListKcbPayments(50)]);
+    const [next, pays, log] = await Promise.all([
+      reload(),
+      adminListKcbPayments(50),
+      adminListStkLog(20),
+    ]);
     setPayments(pays);
+    setStkLog(log);
     const row = next.find((item) => item.slug === "one-concert-2026");
     if (row) {
       setSlide((cur) =>
@@ -73,6 +81,7 @@ export function AdminFundraisers() {
 
   useEffect(() => {
     void adminListKcbPayments(50).then(setPayments).catch(() => undefined);
+    void adminListStkLog(20).then(setStkLog).catch(() => undefined);
   }, []);
 
   useEffect(() => {
@@ -454,6 +463,35 @@ export function AdminFundraisers() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          <h3>M-Pesa prompts (STK push) and results</h3>
+          {stkLog.length === 0 ? (
+            <p className="admin-muted">No M-Pesa prompts logged yet.</p>
+          ) : (
+            <div className="admin-stk-log">
+              {stkLog.map((s) => (
+                <details key={s.id}>
+                  <summary>
+                    {new Date(s.created_at).toLocaleString("en-KE")} ·{" "}
+                    {s.kind === "request" ? "Prompt sent" : "M-Pesa result"} ·{" "}
+                    {s.phone || "—"}
+                    {s.amount_kes != null ? ` · ${formatKes(Number(s.amount_kes))}` : ""}
+                    {s.result_desc ? ` · ${s.result_desc}` : ""}
+                  </summary>
+                  {s.request != null && (
+                    <>
+                      <p className="admin-muted">Request sent</p>
+                      <pre>{JSON.stringify(s.request, null, 2)}</pre>
+                    </>
+                  )}
+                  <p className="admin-muted">
+                    {s.kind === "request" ? "Gateway reply" : "Callback received"}
+                  </p>
+                  <pre>{JSON.stringify(s.response, null, 2)}</pre>
+                </details>
+              ))}
             </div>
           )}
         </section>

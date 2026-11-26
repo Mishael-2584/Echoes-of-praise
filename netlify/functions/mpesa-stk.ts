@@ -1,4 +1,5 @@
 import type { Handler } from "@netlify/functions";
+import { logStk } from "./_stk-log";
 
 type Body = {
   phone?: string;
@@ -115,6 +116,17 @@ async function kcbStkPush(opts: {
     res.ok &&
     String(data.header?.statusCode ?? "") === "0" &&
     String(data.response?.ResponseCode ?? "0") === "0";
+  await logStk({
+    kind: "request",
+    checkout_request_id: data.response?.CheckoutRequestID,
+    phone: opts.phone,
+    amount_kes: opts.amount,
+    result_code: String(data.header?.statusCode ?? res.status),
+    result_desc:
+      data.response?.CustomerMessage || data.header?.statusDescription || "",
+    request: payload,
+    response: Object.keys(data).length ? data : { status: res.status, body: text },
+  });
   return { ok, data, status: res.status, text };
 }
 

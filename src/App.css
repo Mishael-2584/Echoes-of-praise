@@ -4579,3 +4579,23 @@
   border-color: var(--line-strong);
   box-shadow: var(--highlight);
 }
+
+.admin-stk-log details {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.5rem;
+}
+.admin-stk-log summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.admin-stk-log pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.8rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.6rem;
+  border-radius: 6px;
+  user-select: all;
+}

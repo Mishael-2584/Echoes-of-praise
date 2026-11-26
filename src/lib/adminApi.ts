@@ -460,6 +460,33 @@ export type KcbPayment = {
   received_at: string;
 };
 
+export type StkLogEntry = {
+  id: string;
+  kind: "request" | "callback";
+  checkout_request_id: string;
+  phone: string;
+  amount_kes: number | null;
+  result_code: string;
+  result_desc: string;
+  request: unknown;
+  response: unknown;
+  created_at: string;
+};
+
+export async function adminListStkLog(limit = 20): Promise<StkLogEntry[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("kcb_stk_log")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) {
+    if (/kcb_stk_log|schema cache|does not exist/i.test(error.message)) return [];
+    throw error;
+  }
+  return (data as StkLogEntry[]) ?? [];
+}
+
 const LIVE_MIGRATION_HINT =
   "Run supabase/migrations/018_kcb_live_counting.sql in the Supabase SQL editor first.";
 
